@@ -1,5 +1,69 @@
+"""
+ENDPOINTS
+
+GET /search
+parameters:
+    q: str # query
+    c: str # comma separated list of categories
+    t: str # comma separated list of tags
+    a: str # comma separated list of authors
+    p: int # page
+    l: int # limit
+
+## EMOTE
+### Client-Side
+
+GET /emote/<uuid>/downdload
+Download zip file of emotes, contain .json, .png, .gif files
+
+GET /emote/<uuid>/png
+Get emote image
+
+GET /emote/<uuid>/gif
+Get emote gif
+
+GET /emote/<uuid>/json
+Get emote json
+
+### Admin-Side
+
+GET /emote/<uuid>/update/png
+REQUIRED: EMOTES-API-KEY (admin)
+Update emote image
+
+GET /emote/<uuid>/update/gif
+REQUIRED: EMOTES-API-KEY (admin)
+Update emote gif
+
+GET /emote/<uuid>/update/json
+REQUIRED: EMOTES-API-KEY (admin)
+Update emote json
+
+GET /emote/<uuid>/delete
+REQUIRED: EMOTES-API-KEY (admin)
+Delete emote
+
+### OTHER
+
+GET /upload
+Upload emote zip-file with .json, .png, .gif
+REQUIRED: EMOTES-API-KEY api-key
+WARNING: .json file shound contain key 'comment': "*::metadata-start:CATEGORIES: ... ::TAGS: ... ::metadata-end:".
+         CATEGORIES and TAGS should me strings separated by comma.
+
+## EMOTE-PACK
+
+SOON
+
+GET /search_pack
+
+SOON
+
+
+"""
 import json
 from flask import Flask, request
+from flask import send_file
 from loguru import logger
 import os
 
@@ -17,21 +81,27 @@ SKIP_AUTH = True
 def return_json(data):
     return json.dumps(data, ensure_ascii=False, separators=(',', ':'))
 
+def abort(msg: str, status_code: int):
+    return return_json({
+        'success': False,
+        'data': [],
+        'msg': msg
+    }), status_code
+
 def check_access(req: request, route: str):
-    # TODO: 
-    #  - return it in production
-    #
-    # if req.headers.get('User-Agent', '').startswith('EmoteCraftLibrary/gui-client/'):
-    #     return True
-    
+    if req.headers.get('User-Agent', '').startswith('EmoteCraftLibrary/gui-client/'):
+        return True
+
     if not req.headers.get('EMOTES-API-KEY'):
         return False, 'Missing EMOTES-API-KEY Header'
     
     elif req.headers.get('EMOTES-API-KEY'):
+        is_admin = req.headers.get('EMOTES-API-KEY') == os.environ.get('EMOTES_API_KEY')
+
         if route == 'upload':
-            return req.headers.get('EMOTES-API-KEY') == os.environ.get('EMOTES_API_KEY'), 'Invalid EMOTES-API-KEY Header'
+            return is_admin, 'Invalid EMOTES-API-KEY Header'
         
-        elif f"${route}" in req.headers.get('EMOTES-API-KEY'):
+        elif f"$public-api-key$" in req.headers.get('EMOTES-API-KEY') or is_admin:
             return True, "OK"
         
         else:
@@ -43,13 +113,12 @@ def check_auth(func):
     def wrapper(*args, **kwargs):
         if not SKIP_AUTH:
             ok, msg = check_access(request, func.__name__)
-            if not ok: return return_json({
-                'success': False,
-                'data': [],
-                'msg': msg
-            })
+            if not ok: 
+                abort(msg, 401)
         return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
     return wrapper
+
 
 @app.route('/search', methods = ['GET'])
 @check_auth
@@ -61,11 +130,8 @@ def search():
     page       = request.args.get('p', 1)
     limit       = request.args.get('l', 9)
 
-    if int(page) <= 0: return return_json({
-        'success': False,
-        'data': [],
-        'msg': 'Invalid page'
-    })
+    if int(page) <= 0: 
+        return abort('Invalid page', 401)
 
     categories = list(map(lambda x: x.upper().strip(), categories.split(","))) if categories else []
     tags       = list(map(lambda x: x.upper().strip(), tags.split(",")))       if tags else []
@@ -99,38 +165,44 @@ def search():
         'msg': ''
     })
 
-@app.route('/download')
-def download():
-    uuid = request.args.get('uuid')
-    # Your logic here
-    return 'Download file'
+@app.route('/emote/<uuid>/png', methods = ['GET'])
+@check_auth
+def download_png(uuid: str):
+    emote = db.base.emotes.get_one(uuid=uuid)
+    if not emote:
+        return abort('Not found', 404)
+    
+    if not os.path.exists(f"./server/emotes/{emote.tag}.png"):
+        return abort('Not found image on server', 404)
+    
+    # return file
+    return send_file(f"emotes\\{emote.tag}.png", mimetype='image/gif')
 
-@app.route('/search_pack')
-def search_pack():
-    q = request.args.get('q')
-    categories = request.args.get('categories')
-    tags = request.args.get('tags')
-    # Your logic here
-    return 'Search package results'
+@app.route('/emote/<uuid>/gif', methods = ['GET'])
+@check_auth
+def download_gif(uuid: str):
+    emote = db.base.emotes.get_one(uuid=uuid)
+    if not emote:
+        return abort('Not found', 404)
+    
+    if not os.path.exists(f"./server/emotes/{emote.tag}.gif"):
+        return abort('Not found gif on server', 404)
+    
+    # return file
+    return send_file(f"emotes\\{emote.tag}.gif", mimetype='image/gif')
 
-@app.route('/image/<uuid>')
-def image():
-    uuid = request.args.get('uuid')
-    # Your logic here
-    return 'Download file'
-
-@app.route('/gif/<uuid>')
-def gif():
-    uuid = request.args.get('uuid')
-    # Your logic here
-    return 'Download file'
-
-@app.route('/upload')
-def upload():
-    # get file
-    file = request.args.get('file')
-    os.environ.get('EMOTE_UPLOAD_KEY')
-    return 'Add emote'
+@app.route('/emote/<uuid>/json', methods = ['GET'])
+@check_auth
+def download_json(uuid: str):
+    emote = db.base.emotes.get_one(uuid=uuid)
+    if not emote:
+        return abort('Not found', 404)
+    
+    if not os.path.exists(f"./server/emotes/{emote.tag}.json"):
+        return abort('Not found gif on server', 404)
+    
+    # return file
+    return send_file(f"emotes\\{emote.tag}.json")
 
 if __name__ == '__main__':
     app.run()

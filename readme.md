@@ -3,6 +3,8 @@ Program for manage your emotes, search and download new by filters (categories, 
 
 Also, each emotion will be translated into gif using the Blender API, and you can see the animation without even going into minecraft.
 
+# TODO:
+
 GUI TODO:
  - [x] сделать верстку под все табы
  - [x] проверить стресоустойчивость на 1000+ эмоций 
@@ -27,16 +29,18 @@ GUI TODO:
  - [ ] добавить лого
 
 SERVER TODO:
-- [ ] Прописать api для сервера 
-- [ ] Сделать алгоритм поиска по базе данных
-- [ ] Написать SDK для гуишки
-- [ ] Добавить в поиск page, limit,
+- [x] Прописать api для сервера 
+- [x] Сделать алгоритм поиска по базе данных
+- [x] Написать SDK для гуишки
+- [x] Добавить в поиск page, limit,
+- [x] Добавить выдачу .png, .gif, .json эмоций
+- [x] Добавить в SDK методы получения .png, .gif, .json эмоций
 - [ ] Оптимизировать алгоритм поиска, использовать как можно меньше SQL запросов
 - [ ] Сделать алгоритм добавления эмоции в бд по апи кею
 - [ ] Добавить скачивание эмоций 
-- [ ] Добавить выдачу .png, .gif эмоций
 - [ ] Интегрировать поиск с гуи
 - [ ] Импортировать все свои эмоции и проверить работу поиска
+- [ ] Создать .yaml конфиг сервера
 
 
 OTHER TODO:
