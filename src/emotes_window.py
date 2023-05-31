@@ -1,11 +1,13 @@
+from functools import partial
 import dearpygui.dearpygui as dpg
 from dataclasses import dataclass
 import os 
 import json 
-
-
+from PIL import Image
+from threading import Thread
 
 from textures import TEXTURES
+from emotes_storage import local_emotes
 
 @dataclass
 class EmotesWindowSettings:
@@ -19,7 +21,14 @@ class EmotesWindowSettings:
     search = {
         'window': dict(
             label='Categories', 
-            height=35
+            height=40
+        )
+    }
+
+    pages = {
+        'window': dict(
+            label='Pages',
+            height=40
         )
     }
 
@@ -58,6 +67,10 @@ def like_callback(sender, app_data, state):
     # reverse
     dpg.set_item_user_data(sender, not state)
 
+def play_callback(sender, app_data, state):
+    print('Play was clicked.')
+    Thread(target=os.system, args=(f"python src/show_emote.py \"{state}\"",)).start()
+
 def delete_colored_text(text: str):
     while "§" in text:
         i = text.find("§")
@@ -75,7 +88,7 @@ def load_local_emotes():
 
     for file in os.listdir(path + '/emotes'):
         if file.endswith('.json'):
-            name = file.split('.')[0]
+            name = '.'.join(file.split('.')[:-1])
 
             if os.path.exists(f'{path}/emotes/{name}.png'):
                 image = os.path.join(path, f'emotes/{name}.png')
@@ -106,6 +119,13 @@ def load_local_emotes():
 class EmotesWindow:
     def __init__(self, window_name: str):
         self.window_name = window_name
+        self.ch_authors = []
+
+        # pages
+        self.pages = None
+        self.pages_footer = None
+        self.current_page = 1
+        self.page_size = 30
     
     def load_page(self):
         with dpg.group(horizontal=True):
@@ -133,17 +153,91 @@ class EmotesWindow:
                         dpg.add_text('Search:')
                         dpg.add_input_text(default_value='', tag=f"{self.window_name}_search")
                         dpg.add_button(label='Sumbit', callback=self.make_search)
-                
+
                 # emotes list
                 dpg.add_child_window(**EmotesWindowSettings.emotes_list['window'], tag=f"{self.window_name}_emotes_list_window")
-                self.show_emotes()
-                    
+                emotes = load_local_emotes()
+                self.show_emotes(emotes[:self.page_size])
+
+
+    def clear_emotes(self):
+        dpg.delete_item(f"{self.window_name}_emotes_table")
+        #dpg.delete_item(f"{self.window_name}_pages")
+        dpg.delete_item(f"{self.window_name}_pages_footer")
+        self.pages_footer = None
+
+
+    def add_pages(self, parent: int, tag: str = ''):
+        emotes = load_local_emotes()
+        max_page = len(emotes) // self.page_size if len(emotes) % self.page_size == 0 else len(emotes) // self.page_size + 1
+        with dpg.table(**EmotesWindowSettings.emotes_list['table'], parent=parent):
+            dpg.add_table_column()
+            dpg.add_table_column()
+            dpg.add_table_column()
+
+            with dpg.table_row():
+                with dpg.group(horizontal=True):
+                    dpg.add_text('on page:')
+                    dpg.add_combo(['9', '30', '60', '90'], default_value=str(self.page_size), width=50, callback=self.onpage_change)
+
+
+                with dpg.group(horizontal=True):
+                    dpg.add_text(' ')
+                    dpg.add_button(label='<<', callback=lambda: self.change_page(-2))
+
+                    dpg.add_button(label='<', callback=lambda: self.change_page(-1))
+                    dpg.add_text(f'{self.current_page} / {max_page}', tag=tag)
+                    dpg.add_button(label='>', callback=lambda: self.change_page(+1))
+                    dpg.add_button(label='>>', callback=lambda: self.change_page(+2))
+
+
+                dpg.add_table_cell()
+
+    def onpage_change(self, sender, app_data):
+        self.page_size = int(dpg.get_value(sender))
+        self.current_page = 1
+        self.change_page(-2)
+
+    def change_page(self, page: int):
+        emotes = load_local_emotes()
+        max_page = len(emotes) // self.page_size if len(emotes) % self.page_size == 0 else len(emotes) // self.page_size + 1
+        if (self.current_page == 1 and page == -1) or (self.current_page == max_page and page == +1):
+            return
+
+        self.clear_emotes()
+
+        if page == +2:
+            self.current_page = max_page
+            self.show_emotes(emotes[-self.page_size:])
+
+        elif page == -2:
+            self.current_page = 1
+            self.show_emotes(emotes[:self.page_size])
+
+        elif page in (+1, -1):
+            self.current_page += page
+            self.show_emotes(emotes[(self.current_page - 1) * self.page_size : self.current_page * self.page_size])
+    
+        else:
+            raise
+    
+        dpg.configure_item(f"{self.window_name}_text_pages", default_value=f"{self.current_page} / {max_page}")
+        dpg.configure_item(f"{self.window_name}_text_pages_footer", default_value=f"{self.current_page} / {max_page}")
+
 
     def load_emotes(self):
         pass
 
-    def show_emotes(self):
-        emotes = load_local_emotes()
+    def show_emotes(self, emotes: list = None):
+
+        if not self.pages:
+            # show pages
+            # page window 1
+            self.pages = dpg.add_child_window(**EmotesWindowSettings.pages['window'], tag=f"{self.window_name}_pages", parent=f"{self.window_name}_emotes_list_window")
+            self.add_pages(self.pages, tag=f"{self.window_name}_text_pages")
+
+        if not emotes:
+            emotes = load_local_emotes()
 
         emotes_count = 0
         authors = []
@@ -156,72 +250,121 @@ class EmotesWindow:
             dpg.add_table_column()
             dpg.add_table_column()
 
+
+            def create_emote_item(emotes_count):
+                with dpg.child_window(**EmotesWindowSettings.emote['window']) as item: 
+
+                    with dpg.group(horizontal=True):
+
+                        #with dpg.group(horizontal=False):
+                        #with dpg.drawlist(width=25, height=25, user_data=(False), callback=like_callback):
+                        #    dpg.draw_image("heart_off", (0, 0), (25, 25), uv_min=(0, 0), uv_max=(1, 1))
+
+                        with dpg.group(horizontal=False):
+                            TEXTURES.paste_square_image(
+                                "heart_off", size=EmotesWindowSettings.pin_size, user_data=(False), callback=like_callback)
+                            
+                            if emotes[emotes_count]['gif'] not in ('None', None):
+                                TEXTURES.paste_square_image(
+                                    "play", size=EmotesWindowSettings.pin_size, user_data=(emotes[emotes_count]['gif']), callback=play_callback)
+
+
+                            #it = dpg.add_image_button(texture_tag="heart_off", tag=f"like_{i}{j}", width=25, height=25, background_color=(37,37,38))
+                            #dpg.bind_item_theme(it, orng_btn_theme)
+                        
+                        for variant in ('image', 'gif'):
+                            if emotes[emotes_count][variant] not in ('None', None):
+                                try:
+                                    TEXTURES.add(emotes[emotes_count][variant], tag = emotes[emotes_count]['tag'])
+
+                                    TEXTURES.paste_square_image(
+                                        emotes[emotes_count]['tag'], EmotesWindowSettings.emote['img_size'])
+                                    break
+                                except Exception as e:
+                                    raise e
+                                    continue
+                        else:
+                            TEXTURES.paste_square_image(
+                                EmotesWindowSettings.emote['unknown'], EmotesWindowSettings.emote['img_size'])
+                        
+                        with dpg.group(horizontal=False):
+                            it = TEXTURES.paste_square_image(
+                                "list", size=EmotesWindowSettings.pin_size, user_data=(False), callback=like_callback)
+                            #with dpg.tooltip(it):
+                                #dpg.add_text("Types: NSDW, RUN, POSE, ITEM CONTROL")
+                                #dpg.add_text("Tags: SEX, FLY, INVISIBLE")
+
+                            TEXTURES.paste_square_image(
+                                "download", size=EmotesWindowSettings.pin_size, user_data=(False), callback=like_callback)
+                            
+                    dpg.add_separator()
+
+                    tooltip = (
+                        f"Name: {emotes[emotes_count]['name']}\n\n"
+                        f"Author: {emotes[emotes_count]['author']}\n\n"
+                        f"Description: {emotes[emotes_count]['description']}"
+                    )
+
+                    MAX_LENGTH = 20
+                    #item = dpg.add_text('[NSFW] [RUN]')
+                    for col in ['name', 'author', 'description']: 
+                        item = dpg.add_text(emotes[emotes_count][col] if len(emotes[emotes_count][col]) < MAX_LENGTH else emotes[emotes_count][col][:MAX_LENGTH].rstrip() + ' ...')
+                        with dpg.tooltip(item):
+                            dpg.add_text(tooltip)
+                        #dpg.bind_item_font(item, ru_font)
+                    authors.append(emotes[emotes_count]['author'])
+                    emotes_count += 1
+                    return emotes_count
+
+
             for j in range(len(emotes) // 3):
 
                 with dpg.table_row():
 
                     for i in range(3):
+                        emotes_count = create_emote_item(emotes_count)
+            else:
+                if len(emotes) % 3 != 0:
+                    with dpg.table_row():
+                        for i in range(len(emotes) % 3):
+                            emotes_count = create_emote_item(emotes_count)
 
-                        with dpg.child_window(**EmotesWindowSettings.emote['window']) as item: 
+        if not self.pages_footer:
+            # show pages footer
+            # page window 2
+            self.pages_footer = dpg.add_child_window(**EmotesWindowSettings.pages['window'], tag=f"{self.window_name}_pages_footer", parent=f"{self.window_name}_emotes_list_window")
+            self.add_pages(self.pages_footer, tag=f"{self.window_name}_text_pages_footer")
 
-                            with dpg.group(horizontal=True):
 
-                                #with dpg.group(horizontal=False):
-                                #with dpg.drawlist(width=25, height=25, user_data=(False), callback=like_callback):
-                                #    dpg.draw_image("heart_off", (0, 0), (25, 25), uv_min=(0, 0), uv_max=(1, 1))
-
-                                TEXTURES.paste_square_image(
-                                    "heart_off", size=EmotesWindowSettings.pin_size, user_data=(False), callback=like_callback)
-
-                                        
-
-                                    #it = dpg.add_image_button(texture_tag="heart_off", tag=f"like_{i}{j}", width=25, height=25, background_color=(37,37,38))
-                                    #dpg.bind_item_theme(it, orng_btn_theme)
-                                
-                                if emotes[emotes_count]['image'] is not None:
-                                    try:
-                                        TEXTURES.add(emotes[emotes_count]['image'], tag = emotes[emotes_count]['tag'])
-
-                                        TEXTURES.paste_square_image(
-                                            emotes[emotes_count]['tag'], EmotesWindowSettings.emote['img_size'], user_data=(False), callback=like_callback)
-
-                                    except: 
-                                        TEXTURES.paste_square_image(
-                                            EmotesWindowSettings.emote['unknown'], EmotesWindowSettings.emote['img_size'], user_data=(False), callback=like_callback)
-                                else:
-                                    TEXTURES.paste_square_image(
-                                        EmotesWindowSettings.emote['unknown'], EmotesWindowSettings.emote['img_size'], user_data=(False), callback=like_callback)
-                                    
-                                TEXTURES.paste_square_image(
-                                    "list", size=EmotesWindowSettings.pin_size, user_data=(False), callback=like_callback)
-                                
-                            dpg.add_separator()
-
-                            tooltip = (
-                                f"Name: {emotes[emotes_count]['name']}\n\n"
-                                f"Author: {emotes[emotes_count]['author']}\n\n"
-                                f"Description: {emotes[emotes_count]['description']}"
-                            )
-
-                            MAX_LENGTH = 20
-
-                            for col in ['name', 'author', 'description']:
-                                item = dpg.add_text(emotes[emotes_count][col] if len(emotes[emotes_count][col]) < MAX_LENGTH else emotes[emotes_count][col][:MAX_LENGTH].rstrip() + ' ...')
-                                with dpg.tooltip(item):
-                                    dpg.add_text(tooltip)
-                                #dpg.bind_item_font(item, ru_font)
-                            authors.append(emotes[emotes_count]['author'])
-                            emotes_count += 1
-
-        authors = set(authors)
-        for author in authors:
-            it = dpg.add_checkbox(label=author, parent=f"{self.window_name}_Author")  
-            with dpg.tooltip(it):
-                dpg.add_text(author)
+        if not self.ch_authors:
+            authors = set(authors)
+            for author in authors:
+                it = dpg.add_checkbox(label=author, tag=f"{self.window_name}_{author}", parent=f"{self.window_name}_Author", callback=self.make_search)  
+                with dpg.tooltip(it):
+                    dpg.add_text(author)
+                self.ch_authors.append(it)
 
 
     def make_search(self):
-        dpg.delete_item(f"{self.window_name}_emotes_table")
+        #local_emotes.update_emotes()
+
+        self.clear_emotes()
+
+        authors = []
+
+        for checkbox in self.ch_authors:
+            if dpg.get_value(checkbox):
+                label = dpg.get_item_label(checkbox)
+                authors.append(label)
+        
+        emotes = []
+        for author in authors:
+            emotes += local_emotes.base.emotes.get(author=author)
+        
+        #print(emotes)
+
+        self.show_emotes(emotes)
+
 
 
 """

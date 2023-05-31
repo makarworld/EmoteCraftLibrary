@@ -6,6 +6,7 @@ import dearpygui.dearpygui as dpg
 
 
 from emotes_window import EmotesWindow
+from emotes_storage import local_emotes
 
 SIZE = (800, 834)
 
@@ -172,15 +173,15 @@ def main_window():
 
                 with dpg.tab(label="Favorites", tag="favorites_tab"):
                     favorites = EmotesWindow('favorites')
-                    favorites.load_page()  
+                    #favorites.load_page()  
 
                 with dpg.tab(label="Search", tag="search_tab"):
                     search_emotes = EmotesWindow('search_emotes')
-                    search_emotes.load_page()  
+                    #search_emotes.load_page()  
 
                 with dpg.tab(label="Packs", tag="packs_tab"):
                     packs_emotes = EmotesWindow('packs_emotes')
-                    packs_emotes.load_page()          
+                    #packs_emotes.load_page()          
 
 if __name__ == '__main__':
     # show main window

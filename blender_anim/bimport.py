@@ -1,6 +1,9 @@
+"""Module for import emote to blender"""
 import bpy
 import json
 
+
+ 
 # Thanks ЗАРАЗЕН
 
 def import_to_blender(emote_path):
@@ -53,15 +56,15 @@ def import_to_blender(emote_path):
             if(name == "rightLeg" or name == "leftLeg"):
                 value -= 12
         
-        elif (name != "rightItem" and name != "leftItem"):
+        elif name not in ('rightItem', 'leftItem'):
             pass
-        elif(not (name == 'torso' and not (typ == 'roll' or typ == 'bend'))): # rotation correction (*-1) except for torzo roll/bend
+        elif(not (name == 'torso' and not typ in ('roll', 'bend'))): # rotation correction (*-1) except for torzo roll/bend
             value = value * -1
         
-        if(typ == "x" or typ == "y" or typ == "z"):
+        if( typ in ('x', 'y', 'z') ):
             if(not name == 'torso'):
                 value = value / 4
-                if (name != "rightItem" and name != "leftItem"):
+                if name not in ('rightItem', 'leftItem'):
                     value = value * -1
             else:
                 value = value / 0.25

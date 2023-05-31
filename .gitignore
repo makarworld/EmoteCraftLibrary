@@ -150,3 +150,7 @@ render
 backup_date_*
 
 render.json
+anim.blend
+anim.blend1
+*.db
+testgpt.py

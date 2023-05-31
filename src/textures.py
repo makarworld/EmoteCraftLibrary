@@ -1,5 +1,7 @@
 import os
 import dearpygui.dearpygui as dpg
+import random
+import shutil
 
 class TexturesManager:
     def __init__(self):
@@ -17,12 +19,23 @@ class TexturesManager:
             for file in files
         ]
 
+    def random_name(self) -> str:
+        string = 'abcdefghijklmnopqrstuvwxyz0123456789'
+        return ''.join(random.choices(string, k=16))
 
     def add(self, filename: str, tag: str, show=False) -> str:
         if self.tags.get(tag):
             return tag
         
-        width, height, channels, data = dpg.load_image(filename)
+        # check is unicode chars in name
+        if not filename.isascii() or " " in filename:
+            name = self.random_name() + '.' + filename.split(".")[-1]
+            shutil.copyfile(filename, name)
+        
+            width, height, channels, data = dpg.load_image(name)
+            os.remove(name)
+        else:
+            width, height, channels, data = dpg.load_image(filename)
 
         with dpg.texture_registry(show=show):
             dpg.add_static_texture(
@@ -42,8 +55,9 @@ class TexturesManager:
                 uv_min=(0, 0), uv_max=(1, 1)
                 ):
     
-        with dpg.drawlist(width=main_width, height=main_height, user_data=user_data, callback=callback):
-            dpg.draw_image(texture_tag, pmin=pmin, pmax=pmax, uv_min=uv_min, uv_max=uv_max)
+        with dpg.drawlist(width=main_width, height=main_height, user_data=user_data, callback=callback) as drawlist:
+            drawimage = dpg.draw_image(texture_tag, pmin=pmin, pmax=pmax, uv_min=uv_min, uv_max=uv_max)
+        return drawimage
     
     def paste_square_image(
                 self,
@@ -52,7 +66,7 @@ class TexturesManager:
                 user_data = None, callback = None
                 ):
 
-        self.paste_image(
+        return self.paste_image(
             texture_tag, main_width=size, main_height=size, user_data=user_data, callback=callback,
             pmax = (size, size),
         )

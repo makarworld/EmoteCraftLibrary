@@ -41,6 +41,15 @@ def main(emote):
     os.system(f"python create_gif.py \"{emote}\"")
 
 if __name__ == "__main__":
-    #emotes = [x.replace('.json', '') for x in os.listdir(f'{os.path.expanduser("~")}\\AppData\\Roaming\\.minecraft\\emotes') if x.endswith(".json")]
-    #for emote in emotes[:20]:
-    main("letter_A")
+    all_files = os.listdir(f'{os.path.expanduser("~")}\\AppData\\Roaming\\.minecraft\\emotes')
+    emotes = [x.replace('.json', '') for x in all_files if x.endswith(".json")]
+    for emote in emotes:
+
+        if f'{emote}.gif' not in all_files:
+            print(f'{emote}.gif not found')
+            #input()
+            main(emote)
+            shutil.copyfile(f'{emote}.gif', f'{os.path.expanduser("~")}\\AppData\\Roaming\\.minecraft\\emotes\\{emote}.gif')
+            os.remove(f'{emote}.gif')
+    else:
+        print('All emotes were rendered.')
