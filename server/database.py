@@ -21,17 +21,14 @@ class ManageDB(Singleton):
                     'description': str,
                     'uuid':        str,
                     'tag':         str,
-                    'path':        str,
-                    'image':       str,
-                    'gif':         str,
-                    'nsfw':        bool
+                    'degrees':     bool,
+                    'nsfw':        bool,
+                    'loop':        bool
                 },
                 "categories": {
-                    #"cid": int,
                     "name": str
                 },
                 "tags": {
-                    #"tid": int,
                     "name": str
                 },
                 "emotes_tags": {

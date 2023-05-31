@@ -10,6 +10,9 @@ parameters:
     p: int # page
     l: int # limit
 
+GET /info
+Return info about server
+
 ## EMOTE
 ### Client-Side
 
@@ -65,18 +68,21 @@ import json
 from flask import Flask, request
 from flask import send_file
 from loguru import logger
+import base64
 import os
 
 try:
     from .database import ManageDB
+    from .utils import generate_uuid
 except:
     from database import ManageDB
+    from utils import generate_uuid
 
 app = Flask(__name__)
 db = ManageDB()
 
 SKIP_AUTH = True
-
+PRIVATE_ROUTES = ('upload',)
 
 def return_json(data):
     return json.dumps(data, ensure_ascii=False, separators=(',', ':'))
@@ -90,7 +96,7 @@ def abort(msg: str, status_code: int):
 
 def check_access(req: request, route: str):
     if req.headers.get('User-Agent', '').startswith('EmoteCraftLibrary/gui-client/'):
-        return True
+        return True, "OK"
 
     if not req.headers.get('EMOTES-API-KEY'):
         return False, 'Missing EMOTES-API-KEY Header'
@@ -98,10 +104,10 @@ def check_access(req: request, route: str):
     elif req.headers.get('EMOTES-API-KEY'):
         is_admin = req.headers.get('EMOTES-API-KEY') == os.environ.get('EMOTES_API_KEY')
 
-        if route == 'upload':
+        if route in PRIVATE_ROUTES:
             return is_admin, 'Invalid EMOTES-API-KEY Header'
         
-        elif f"$public-api-key$" in req.headers.get('EMOTES-API-KEY') or is_admin:
+        elif req.headers.get('EMOTES-API-KEY') == "$public-api-key$" or is_admin:
             return True, "OK"
         
         else:
@@ -116,7 +122,10 @@ def check_auth(func):
             if not ok: 
                 abort(msg, 401)
         return func(*args, **kwargs)
+    
+    # fix error with decorator and flask route
     wrapper.__name__ = func.__name__
+
     return wrapper
 
 
@@ -135,7 +144,7 @@ def search():
 
     categories = list(map(lambda x: x.upper().strip(), categories.split(","))) if categories else []
     tags       = list(map(lambda x: x.upper().strip(), tags.split(",")))       if tags else []
-    authors    = list(map(lambda x: x.upper().strip(), authors.split(",")))    if authors else []
+    authors    = list(map(lambda x: x.strip(),         authors.split(",")))    if authors else []
 
     logger.info(f"{q=}, {categories=}, {tags=}, {authors=}")
 
@@ -164,6 +173,41 @@ def search():
         'limit': limit,
         'msg': ''
     })
+
+@app.route('/info', methods = ['GET'])
+@check_auth
+def info():
+    emotes_count = db.base.emotes.execute(
+        cmd = "SELECT * FROM emotes ORDER BY id DESC LIMIT ?",
+        values = (1,),
+        fetchall = True
+    )
+
+    categories_count = db.base.emotes_categories.execute(
+        cmd = "SELECT * FROM emotes_categories ORDER BY id DESC LIMIT ?",
+        values = (1,),
+        fetchall = True
+    )
+
+    tags_count = db.base.emotes_tags.execute(
+        cmd = "SELECT * FROM emotes_tags ORDER BY id DESC LIMIT ?",
+        values = (1,),
+        fetchall = True
+    )
+
+    # Your logic here
+    return return_json({
+        'success': True, 
+        'data': [],
+        'info': {
+            'emotes_count': emotes_count,
+            'categories_count': categories_count,
+            'tags_count': tags_count
+        },
+        'msg': ''
+    })
+
+
 
 @app.route('/emote/<uuid>/png', methods = ['GET'])
 @check_auth
@@ -203,6 +247,70 @@ def download_json(uuid: str):
     
     # return file
     return send_file(f"emotes\\{emote.tag}.json")
+
+#@app.route('/upload', methods = ['POST'])
+#@check_auth
+#def upload():
+    # get 3 files from request
+    # get json payload from request
+
+    #print(request.files)
+    #print(request.__dict__)
+    #return '{}'
+
+@app.route('/upload', methods=['POST'])
+@check_auth
+def upload():
+    payload = request.get_json(silent=True)
+    if not payload:
+        return abort('Invalid payload', 400)
+    
+    if db.base.emotes.get_one(tag=payload['tag']):
+        return abort('Tag already exists', 400)
+    
+    for extension in ['json', 'png', 'gif']:
+        with open(f"./server/emotes/{payload['tag']}.{extension}", 'wb') as f:
+            f.write(base64.b64decode(payload[extension]))
+    
+    db.base.emotes.add(
+        name        = payload['name'],
+        lname       = payload['name'].lower(),
+        author      = payload['author'],
+        description = payload['description'],
+        uuid        = payload.get('uuid', generate_uuid(payload)), # !!!!
+        tag         = payload['tag'],
+        degrees     = payload['degrees'],
+        nsfw        = payload['nsfw'],
+        loop        = payload['isLoop'],
+    )
+
+    emote = db.base.emotes.get_one(tag=payload['tag'])
+
+    for category in payload['categories']:
+        if not db.base.categories.get_one(name = category):
+            db.base.categories.add(name = category)
+
+        category_id = db.base.categories.get_one(name = category).id
+
+        db.base.emotes_categories.add(
+            eid = emote.id,
+            cid = category_id
+        )
+    
+    for tag in payload['tags']:
+        if not db.base.tags.get_one(name = tag):
+            db.base.tags.add(name = tag)
+        
+        tag_id = db.base.tags.get_one(name = tag).id
+
+        db.base.emotes_tags.add(
+            eid = emote.id,
+            tid = tag_id
+        )
+
+
+    return return_json(emote.dict())
+
 
 if __name__ == '__main__':
     app.run()

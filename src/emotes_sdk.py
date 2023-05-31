@@ -1,5 +1,8 @@
+import json
+import os
 from typing import List
 import requests
+import base64
 
 class BaseSDK:
     def __init__(self, api_key: str = None, test: bool = True):
@@ -7,7 +10,7 @@ class BaseSDK:
         self.test = test
 
         #if self.test:
-        self.url = "http://127.0.0.1:5000/"
+        self.url = "http://127.0.0.1:5000"
 
         self.session = requests.Session()
         self.session.headers.update({
@@ -51,36 +54,78 @@ class BaseSDK:
         
         return self.call("GET", f"/search", params=params)
 
+    def info(self):
+        return self.call("GET", "/info")
+
     def get_png(self, uuid: str, path_to_save: str = None):
         resp = self.call("GET", f"/emote/{uuid}/png", raw = True)
         if path_to_save:
             with open(path_to_save, 'wb') as f:
                 f.write(resp.content)
-        return resp.content
+        return resp
     
     def get_gif(self, uuid: str, path_to_save: str = None):
         resp = self.call("GET", f"/emote/{uuid}/gif", raw = True)
         if path_to_save:
             with open(path_to_save, 'wb') as f:
                 f.write(resp.content)
-        return resp.content
+        return resp
 
     def get_json(self, uuid: str, path_to_save: str = None):
         resp = self.call("GET", f"/emote/{uuid}/json", raw = True)
         if path_to_save:
             with open(path_to_save, 'wb') as f:
                 f.write(resp.content)
-        return resp.content
+        return resp
+
+    def upload(self, 
+               path_json:  str,
+               path_png:   str,
+               path_gif:   str,
+               categories: List[str],
+               tags:       List[str]):
+        
+        upload_data = {}
+
+        with open(path_json, "rb") as file:
+            upload_data['json'] = base64.b64encode(file.read())
+        
+        with open(path_png, "rb") as file:
+            upload_data['png'] = base64.b64encode(file.read())
+
+        with open(path_gif, "rb") as file:
+            upload_data['gif'] = base64.b64encode(file.read())
+        
+        with open(path_json, "r") as file:
+            data = json.load(file)
+        
+        upload_data.update({k: v for k, v in data.items() if k not in ('emote')})
+
+        for key in ['isLoop', 'degrees', 'nsfw']:
+            upload_data[key] = data['emote'].get(key, False)
+        
+        upload_data['tag'] = os.path.basename(path_json.replace('.json', ''))
+
+        upload_data['categories'] = categories
+        upload_data['tags'] = tags
+
+        return self.session.post(f"{self.url}/upload", json=upload_data).json()
 
 if __name__ == "__main__":
-    emotes_sdk = BaseSDK()
-    #resp = emotes_sdk.search(
-    #    #query="test",
-    #    categories=["RUN", "SEX"],
-    #    #tags=["test"],
-    #    #authors=["test"],
-    #    page=1,
-    #    limit=9
+    emotes_sdk = BaseSDK(api_key = os.environ.get('EMOTES_API_KEY'))
+
+    #r = emotes_sdk.upload(
+    #    "./server/emotes/bee5.json", 
+    #    "./server/emotes/bee5.png", 
+    #    "./server/emotes/bee5.gif",
+    #    categories=["FLY", "FUN", "LOOP"], 
+    #    tags=["BEE", "ANIMAL", "FLY"])
+    #print(r)
+    #r = emotes_sdk.search(
+    #    query="v5",
+    #    authors=['BoBkiNN_']
     #)
-    #print(resp.json())
-    emotes_sdk.get_png(123, "test.png")
+    #r = emotes_sdk.get_json(
+    #    "00101460-4644-b610-4430-d440084480c0"
+    #)
+    #print(r.json())

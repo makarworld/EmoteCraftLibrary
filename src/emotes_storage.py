@@ -45,9 +45,6 @@ class EmotesStorage:
         return uuid
         
 
-        
-
-
     def update_emotes(self):
         path = dpg.get_value("minecraft_path")
 
