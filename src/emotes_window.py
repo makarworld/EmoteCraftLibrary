@@ -8,7 +8,7 @@ from threading import Thread
 
 from textures import TEXTURES
 from emotes_storage import local_emotes
-
+from emotes_sdk import EmoteSDK
 @dataclass
 class EmotesWindowSettings:
     categories = {
@@ -363,19 +363,20 @@ class EmotesWindow:
 class LocalEmotes(EmotesWindow):
 
     def load_emotes(self, page: int, size: int):
-        return load_local_emotes()
+        return EmoteSDK().search(page=page, limit=size)
     
     def load_categories(self):
-        return []
+        return EmoteSDK().get_categories()
     
     def load_authors(self):
-        return []
+        return EmoteSDK().get_authors()
 
     def load_tags(self):
-        return []
+        return EmoteSDK().get_tags()
     
     def max_page(self):
-        return len(self.load_emotes())
+        info = EmoteSDK().info()
+        return info['info']['emotes_count'] // self.page_size + (1 if info['info']['emotes_count'] % self.page_size else 0)
 
 class FavoriteEmotes(EmotesWindow):
 

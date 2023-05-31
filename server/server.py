@@ -13,6 +13,15 @@ parameters:
 GET /info
 Return info about server
 
+GET /categories
+Return all categories
+
+GET /authors
+Return all authors
+
+GET /tags
+Return all tags
+
 ## EMOTE
 ### Client-Side
 
@@ -82,7 +91,7 @@ app = Flask(__name__)
 db = ManageDB()
 
 SKIP_AUTH = True
-PRIVATE_ROUTES = ('upload',)
+PRIVATE_ROUTES = ('upload', 'delete_emote')
 
 def return_json(data):
     return json.dumps(data, ensure_ascii=False, separators=(',', ':'))
@@ -177,6 +186,7 @@ def search():
 @app.route('/info', methods = ['GET'])
 @check_auth
 def info():
+    # count
     emotes_count = db.base.emotes.execute(
         cmd = "SELECT * FROM emotes ORDER BY id DESC LIMIT ?",
         values = (1,),
@@ -207,7 +217,53 @@ def info():
         'msg': ''
     })
 
+@app.route('/categories', methods = ['GET'])
+@check_auth
+def categories():
+    categories = db.base.categories.execute(
+        cmd = "SELECT name FROM categories",
+        values = (),
+        fetchall = True
+    )
+    categories = sorted([x[0] for x in categories])
 
+    return return_json({
+        'success': True,
+        'data': categories,
+        'msg': ''
+    })
+
+@app.route('/tags', methods = ['GET'])
+@check_auth
+def tags():
+    tags = db.base.tags.execute(
+        cmd = "SELECT name FROM tags",
+        values = (),
+        fetchall = True
+    )
+    tags = sorted([x[0] for x in tags])
+
+    return return_json({
+        'success': True,
+        'data': tags,
+        'msg': ''
+    })
+
+@app.route('/authors', methods = ['GET'])
+@check_auth
+def authors():
+    authors = db.base.emotes.execute(
+        cmd = "SELECT author FROM emotes",
+        values = (),
+        fetchall = True
+    )
+    authors = sorted([x[0] for x in authors])
+
+    return return_json({
+        'success': True,
+        'data': authors,
+        'msg': ''
+    })
 
 @app.route('/emote/<uuid>/png', methods = ['GET'])
 @check_auth
@@ -248,6 +304,40 @@ def download_json(uuid: str):
     # return file
     return send_file(f"emotes\\{emote.tag}.json")
 
+@app.route('/emote/<uuid>/delete', methods = ['GET'])
+@check_auth
+def delete_emote(uuid: str):
+    emote = db.base.emotes.get_one(uuid=uuid)
+    if not emote:
+        return abort('Not found', 404)
+    
+    for ext in ['json', 'png', 'gif']:
+        if os.path.exists(f"./server/emotes/{emote.tag}.{ext}"):
+            os.remove(f"./server/emotes/{emote.tag}.{ext}")
+    
+    db.base.emotes.execute(
+        cmd = "DELETE FROM emotes WHERE uuid = ?",
+        values = (emote.uuid,)
+    )
+
+    db.base.emotes_categories.execute(
+        cmd = "DELETE FROM emotes_categories WHERE eid = ?",
+        values = (emote.id,)
+    )
+
+    db.base.emotes_tags.execute(
+        cmd = "DELETE FROM emotes_tags WHERE eid = ?",
+        values = (emote.id,)
+    )
+
+    # return file
+    return return_json({
+        'success': True,
+        'data': [],
+        'msg': ''
+    })
+
+
 #@app.route('/upload', methods = ['POST'])
 #@check_auth
 #def upload():
@@ -271,7 +361,7 @@ def upload():
     for extension in ['json', 'png', 'gif']:
         with open(f"./server/emotes/{payload['tag']}.{extension}", 'wb') as f:
             f.write(base64.b64decode(payload[extension]))
-    
+
     db.base.emotes.add(
         name        = payload['name'],
         lname       = payload['name'].lower(),
@@ -308,9 +398,16 @@ def upload():
             tid = tag_id
         )
 
-
     return return_json(emote.dict())
 
+@app.route('/test')
+def test():
+    print('req', request.__dict__)
+    print('files', request.files)
+    print('json', request.get_json(silent=True))
+    print('args', request.args)
+    print('form', request.form)
+    return return_json({})
 
 if __name__ == '__main__':
     app.run()

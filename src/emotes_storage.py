@@ -3,7 +3,8 @@ import dearpygui.dearpygui as dpg
 from mwsqlite import MWBase
 import os
 import json
-import hashlib
+
+from utils import generate_uuid
 
 def delete_colored_text(text: str):
     while "§" in text:
@@ -28,22 +29,6 @@ class EmotesStorage:
             }
         })
     
-    def generate_uuid(self, data):
-        """
-        Emote UUID generator by name, author, description.
-        """
-        # f50ec0b7-f960-400d-91f0-c42a6d44e3d0
-        #
-        string = '0123456789abcdef'
-        unic = data['name'].lower() + data['author'].lower() + data['description'].lower()
-        unic = unic.replace(' ', '')
-        uuid = sum([ord(x) for x in hashlib.md5(unic.encode()).hexdigest()])
-        bighash = 89809223 + uuid
-        uuid = ''.join([string[x] if x < len(string) else string[x - 16] for x in [bighash % i for i in range(1, 33)]])
-        uuid = f"{uuid[:8]}-{uuid[8:12]}-{uuid[12:16]}-{uuid[16:20]}-{uuid[20:]}"
-
-        return uuid
-        
 
     def update_emotes(self):
         path = dpg.get_value("minecraft_path")
@@ -77,15 +62,15 @@ class EmotesStorage:
                 
                 # if uuid already exists in database -> skip
                 print(data)
-                print(self.generate_uuid(data))
-                if self.base.emotes.get(uuid=data.get("uuid", self.generate_uuid(data))):
+                print(generate_uuid(data))
+                if self.base.emotes.get(uuid=data.get("uuid", generate_uuid(data))):
                     continue
 
                 emote_data = dict(
                     name        = delete_colored_text(data["name"]),
                     author      = delete_colored_text(data["author"]),
                     description = delete_colored_text(data["description"]),
-                    uuid        = data.get("uuid", self.generate_uuid(data)),
+                    uuid        = data.get("uuid", generate_uuid(data)),
                     tag         = name,
                     path        = file_path,
                     image       = image,
