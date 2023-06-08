@@ -46,6 +46,19 @@ class TexturesManager:
 
         return tag
 
+    def add_content(self, content: bytes, width: int, height: int, tag: str, show=False) -> str:
+        if self.tags.get(tag):
+            return tag
+        
+        with dpg.texture_registry(show=show):
+            dpg.add_static_texture(
+                width=width, height=height, 
+                default_value=content, tag=tag)
+        
+            self.tags[tag] = "binary"
+
+        return tag
+
     def paste_image(
                 self,
                 texture_tag: str, 

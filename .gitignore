@@ -155,3 +155,4 @@ anim.blend1
 *.db
 testgpt.py
 server/emotes/*
+src/_qframelesswindow/

@@ -76,6 +76,7 @@ SOON
 import json
 from flask import Flask, request
 from flask import send_file
+from flask_cors import CORS
 from loguru import logger
 import base64
 import os
@@ -88,6 +89,7 @@ except:
     from utils import generate_uuid
 
 app = Flask(__name__)
+CORS(app)
 db = ManageDB()
 
 SKIP_AUTH = True
@@ -188,22 +190,22 @@ def search():
 def info():
     # count
     emotes_count = db.base.emotes.execute(
-        cmd = "SELECT * FROM emotes ORDER BY id DESC LIMIT ?",
+        cmd = "SELECT id FROM emotes ORDER BY id DESC LIMIT ?",
         values = (1,),
         fetchall = True
-    )
+    )[0][0]
 
     categories_count = db.base.emotes_categories.execute(
-        cmd = "SELECT * FROM emotes_categories ORDER BY id DESC LIMIT ?",
+        cmd = "SELECT id FROM emotes_categories ORDER BY id DESC LIMIT ?",
         values = (1,),
         fetchall = True
-    )
+    )[0][0]
 
     tags_count = db.base.emotes_tags.execute(
-        cmd = "SELECT * FROM emotes_tags ORDER BY id DESC LIMIT ?",
+        cmd = "SELECT id FROM emotes_tags ORDER BY id DESC LIMIT ?",
         values = (1,),
         fetchall = True
-    )
+    )[0][0]
 
     # Your logic here
     return return_json({
@@ -257,7 +259,7 @@ def authors():
         values = (),
         fetchall = True
     )
-    authors = sorted([x[0] for x in authors])
+    authors = sorted(list(set([x[0] for x in authors])))
 
     return return_json({
         'success': True,

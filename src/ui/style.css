@@ -1,0 +1,542 @@
+* {
+    box-sizing: border-box;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #28272A;
+  
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #494949;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #494949;
+}
+
+body {
+    background-color: #18181A; 
+    font-family: 'Rubik', sans-serif;
+    color: #ffffff;
+    height: 100%;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+
+
+.container {
+    border-top: #3B82F6 1px solid;
+    border-left: #3B82F6 1px solid;
+    border-right: #3B82F6 1px solid;
+    border-bottom: #3B82F6 1px solid;
+    
+    height: 100%;
+    width: 100%;
+
+    /*
+    height: 720px;
+    width: 1280px;
+    */
+
+    /*
+    height: 100%;
+    width: 100%;
+    */
+
+    display: block;
+    margin: 0 auto;
+}
+
+.titlebar {
+    user-select: none;
+    display: block;
+    position: relative;
+    height: 35px;
+    background: #272729;
+    min-height: 35px;
+
+    
+}
+
+.bar-left {
+    display: block;
+    position: absolute;
+    justify-content: space-between;
+    width: 90px;
+    height: 20px;
+    left: 12px;
+}
+
+.bar-left-items {
+    display: flex;
+    justify-content: space-between;
+    width: 99px;
+    height: 20px;
+}
+
+.settings {
+    display: block;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    top: 7px;
+}
+
+.light-mode {
+    display: block;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    top: 7px;
+}
+
+.help {
+    display: block;
+    position: relative;
+    width: 12px;
+    height: 20px;
+    top: 7px;
+}
+
+.upper_logo {
+    display: inline-block;
+    position: relative;
+    width: 141px;
+    height: 35px;
+    left: calc(50% - 141px/2 + 21.5px);
+
+}
+
+.bar-right {
+    display: block;
+    float: right;
+}
+
+.bar-item {
+  display: block;
+  width: 55px;
+  height: 35px;
+}
+
+.bar-item:hover {
+  background-color: #18181A;
+}
+
+.bar-item a img {
+  display: block;
+  margin: 6px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.bar-right-items {
+    display: flex;
+    justify-content: space-between;
+    width: 133px;
+    height: 20px;
+}
+
+.minimize {
+    display: block;
+    position: relative;
+    top: 6px;
+}
+
+
+.emotes-content {
+    display: flex;
+    height: calc(100% - 35px);
+}
+
+.sidebar {
+    display: block;
+    position: relative;
+    width: calc(183px + 16px);                      
+    height: 100%;
+
+
+}
+
+.filters {
+    display: block;
+    position: relative;
+    width: 183px;
+    height: calc(100% - 8px - 8px);
+    left: 8px;
+    top: 8px;
+    background-color: #28272A;
+    border-radius: 10px;
+}
+
+.Rubik-600 {
+    color: #ffffff;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.filters-title {
+    display: block;
+    position: relative;
+    top: 15px;
+    left: 65px;
+}
+
+.single-filter-title {
+    position: sticky;
+    padding-top: 2px;
+    padding-left: 2px;
+}
+
+.dropdown-btn span {
+    position: relative;
+    bottom: 4px;
+}
+
+.dropdown-btn img {
+  pointer-events: none;
+}
+
+
+.single-filter-content {
+    position: relative;
+    padding-bottom: 6px;
+
+}
+
+input[type="radio"] {
+    appearance: none;
+}
+
+.filters-content {
+    user-select: none;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    position: relative;
+    display: block;
+    top: 20px;
+    height: calc(100% - 46px);
+    width: 90%;
+    left: 12px;
+}
+
+.wrap-content {
+    position: relative;
+    top: 1px;
+    left: 6px;
+}
+
+.line-label {
+    display: inline;
+    position: relative;
+    color: #ACACAC;
+    left: 3px;
+    font-weight: 300;
+}
+
+.line-radio {
+    position: relative;
+    vertical-align: middle;
+    font-family: 'Inter';
+    font-weight: 400;
+    font-size: 14px;
+} 
+
+.wrap-content img {
+    padding-top: 1.5px;
+}
+
+
+.title-flipper.rotate {
+    transform: rotate(90deg);
+}
+
+.title-flipper {
+    top: 0;
+    background-color: #28272A;
+    z-index: 1;
+
+    transition: 0.5s;
+    position: sticky;
+}
+
+.fade-insert {
+    opacity: 0;
+    animation: ani 0.5s forwards;
+}
+
+@keyframes ani {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+
+.search-bar {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 42px;
+}
+
+.search-bg {
+    display: block;
+    position: relative;
+    width: calc(100% - 24px);
+
+    height: 42px;
+    
+    background: #28272A;
+    border-radius: 10px;
+    top: 8px;
+    left: 16px;
+}
+
+.search-input {
+    display: block;
+    position: absolute;
+    background: #3F3F46;
+    width: calc(100% - 84px);
+    height: 26px;
+    border-radius: 10px;
+    left: 8px;
+    top: 8px;
+}
+
+.query {
+    display: block;
+    position: relative;
+    color: #ffffff;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 500;
+    width: calc(100% - 10px);
+    left: 6px;
+    top: 3px;
+}
+
+.search-btn {
+    display: block;
+    position: relative;
+    float: right;
+    width: 60px;
+    height: 26px;
+    top: 8px;
+    right: 8px;
+
+
+
+    background: #3B82F6;
+    border-radius: 10px;
+}
+
+.search-icon-btn {
+    display: block;
+    position: relative;
+    margin: auto;
+    top: 5px;
+}
+
+.vertical-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.emotes {
+    display: block;
+    position: relative;
+    width: calc(100% - 24px);
+    height: calc(100% - 66px);
+    left: 16px;
+    top: 16px;
+    border-radius: 10px;
+
+    background-color: #28272A;
+}
+
+.emotes span {
+  display: block;
+  position: relative;
+  color: #565656;
+  top: 8px;
+  left: 8px;
+}
+
+.emotes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  user-select: none;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  position: relative;
+
+  border-radius: 10px;
+
+  left: 5px;
+  top: 16px;
+  width: calc(99%);
+  height: calc(93%);
+
+}
+
+.emote {
+  position: flex;
+  display: inline-block;
+  background-color: #D9D9D9;
+  width: 200px;
+  height: 263px;
+  padding-right: 8px;
+  margin: 5px;
+  border-radius: 10px;
+
+}
+
+.emote-header {
+    position: relative;
+    display: inline-block;
+    background-color: #D9D9D9;
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+}
+
+.emote-footer {
+    position: relative;
+    display: inline-block;
+    background-color: #FFFFFF;
+    width: 200px;
+    height: 63px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.wait {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: rotate(0deg);
+}
+
+.wait img {
+    width: 50px;
+    height: 50px;
+}
+
+.wait.loading {
+    animation-name: falling;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes falling {
+  0% {top: 0;}
+  8% {
+    top: 25px;
+    transform: rotate(0deg);
+  }
+  24% {
+    top: 0;
+    transform: rotate(0deg);
+  }
+  32% {
+    top: 25px;
+    transform: rotate(0deg);
+  }
+  40% {
+    top: 0;
+    transform: rotate(0deg);
+  }
+  100% {
+    top: 0;
+    transform: rotate(360deg);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);;
+  }
+}
+
+.emote-img img {
+    display: block;
+    width: 200px;
+    height: 200px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    top: 0;
+}
+
+.emote-img {
+    display: block;
+    position: absolute;
+    top: 0;
+}
+
+.emote-like {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.emote-like img {
+    width: 20px;
+    height: 18px;
+}
+
+.emote-footer-content {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.emote-title {
+    display: block;
+    position: relative;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.emote-author {
+    display: block;
+    position: relative;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 400;
+    font-size: 12px;
+}
+
+.emote-download {
+    display: block;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 20px;
+    height: 28px;
+}

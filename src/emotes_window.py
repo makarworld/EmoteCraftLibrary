@@ -69,7 +69,15 @@ def like_callback(sender, app_data, state):
 
 def play_callback(sender, app_data, state):
     print('Play was clicked.')
-    Thread(target=os.system, args=(f"python src/show_emote.py \"{state}\"",)).start()
+    method, data = state 
+    if method == 'file':
+        Thread(target=os.system, args=(f"python src/show_emote.py \"{state}\"",)).start()
+    
+    elif method == 'uuid':
+        EmoteSDK().get_gif(data, f"{data}.gif")
+        Thread(target=os.system, args=(f"python src/show_emote.py \"{data}.gif\"" "remove",)).start()
+        #os.remove(f"{data}.gif")
+        
 
 def delete_colored_text(text: str):
     while "§" in text:
@@ -120,6 +128,7 @@ class EmotesWindow:
     def __init__(self, window_name: str):
         self.window_name = window_name
         self.ch_authors = []
+        self.checkboxes = {}
 
         # pages
         self.pages = None
@@ -133,23 +142,19 @@ class EmotesWindow:
             # categories window
             with dpg.child_window(**EmotesWindowSettings.categories['window']):
                 
-                dpg.add_text('Categories')
+                dpg.add_text('Filtres:')
                 categories = {
-                    'Type': self.load_categories(),
+                    'Categories': self.load_categories(),
                     'Tags': self.load_tags(),
+                    'Authors': self.load_authors()
                 }
 
                 for category, values in categories.items():
-                    with dpg.tree_node(label=category, tag=f"{self.window_name}_{category}"):
+                    self.checkboxes[category] = []
+                    with dpg.tree_node(label=category):
                         for value in values:
-                            dpg.add_checkbox(label=value)
-
-                authors = set(self.load_authors())
-                for author in authors:
-                    it = dpg.add_checkbox(label=author, tag=f"{self.window_name}_{author}", parent=f"{self.window_name}_Author", callback=self.make_search)  
-                    with dpg.tooltip(it):
-                        dpg.add_text(author)
-                    self.ch_authors.append(it)
+                            it = dpg.add_checkbox(label=value, callback=self.make_search)
+                            self.checkboxes[category].append(it)
 
 
             with dpg.group(horizontal=False):
@@ -158,13 +163,13 @@ class EmotesWindow:
                     
                     with dpg.group(horizontal=True):
                         dpg.add_text('Search:')
-                        dpg.add_input_text(default_value='', tag=f"{self.window_name}_search")
-                        dpg.add_button(label='Sumbit', callback=self.make_search)
+                        dpg.add_input_text(default_value='', tag=f"{self.window_name}_search", callback=fix_input)
+                        #dpg.add_button(label='Sumbit', callback=self.make_search)
 
                 # emotes list
                 dpg.add_child_window(**EmotesWindowSettings.emotes_list['window'], tag=f"{self.window_name}_emotes_list_window")
-                emotes = load_local_emotes()
-                self.show_emotes(emotes[:self.page_size])
+                emotes = self.load_emotes(self.current_page, self.page_size)
+                self.show_emotes(emotes)
 
 
     def clear_emotes(self):
@@ -175,8 +180,7 @@ class EmotesWindow:
 
 
     def add_pages(self, parent: int, tag: str = ''):
-        emotes = self.load_emotes()
-        max_page = len(emotes) // self.page_size if len(emotes) % self.page_size == 0 else len(emotes) // self.page_size + 1
+        max_page = self.max_page()
         with dpg.table(**EmotesWindowSettings.emotes_list['table'], parent=parent):
             dpg.add_table_column()
             dpg.add_table_column()
@@ -231,7 +235,7 @@ class EmotesWindow:
         dpg.configure_item(f"{self.window_name}_text_pages_footer", default_value=f"{self.current_page} / {max_page}")
 
 
-    def load_emotes(self, page: int, size: int): ...
+    def load_emotes(self, *args, **kwargs): ...
     
     def load_categories(self): ...
     
@@ -242,6 +246,23 @@ class EmotesWindow:
     def max_page(self): ...
 
     def show_emotes(self, emotes: list = None):
+        print(emotes)
+        if len(emotes) == 0:
+            with dpg.table(
+                        **EmotesWindowSettings.emotes_list['table'], 
+                        tag=f"{self.window_name}_emotes_table", 
+                        parent=f"{self.window_name}_emotes_list_window"):
+                
+                dpg.add_table_column()
+                dpg.add_table_column()
+                dpg.add_table_column()
+
+                with dpg.table_row():
+                    dpg.add_table_cell()
+                    dpg.add_text("Not Found")
+                    dpg.add_table_cell()
+            return
+
 
         if not self.pages:
             # show pages
@@ -269,14 +290,23 @@ class EmotesWindow:
                             TEXTURES.paste_square_image(
                                 "heart_off", size=EmotesWindowSettings.pin_size, user_data=(False), callback=like_callback)
                             
-                            if emotes[emotes_count]['gif'] not in ('None', None):
-                                TEXTURES.paste_square_image(
-                                    "play", size=EmotesWindowSettings.pin_size, user_data=(emotes[emotes_count]['gif']), callback=play_callback)
+                            #if self.window_name == 'search_emotes':
+                            #    TEXTURES.paste_square_image(
+                            #        "play", size=EmotesWindowSettings.pin_size, user_data=('uuid', emotes[emotes_count]['uuid']), callback=play_callback)
 
+                            if emotes[emotes_count].get('gif') not in ('None', None):
+                                TEXTURES.paste_square_image(
+                                    "play", size=EmotesWindowSettings.pin_size, user_data=('file', emotes[emotes_count]['gif']), callback=play_callback)
+
+                        #if self.window_name == 'search_emotes':
+                        #    TEXTURES.add_content(EmoteSDK().get_png(emotes[emotes_count]['uuid']), 256, 256, tag = emotes[emotes_count]['tag'])
+                        #    TEXTURES.paste_square_image(
+                        #                emotes[emotes_count]['tag'], EmotesWindowSettings.emote['img_size'])
+                        #else:
                         for variant in ('image', 'gif'):
-                            if emotes[emotes_count][variant] not in ('None', None):
+                            if emotes[emotes_count].get(variant) not in ('None', None):
                                 try:
-                                    TEXTURES.add(emotes[emotes_count][variant], tag = emotes[emotes_count]['tag'])
+                                    TEXTURES.add(emotes[emotes_count].get(variant), tag = emotes[emotes_count]['tag'])
 
                                     TEXTURES.paste_square_image(
                                         emotes[emotes_count]['tag'], EmotesWindowSettings.emote['img_size'])
@@ -338,6 +368,87 @@ class EmotesWindow:
         #    self.add_authors(authors)
 
 
+    def make_search(self): ...
+
+
+class OnlineEmotes(EmotesWindow):
+    
+    def load_emotes(self, page: int = 1, size: int = 30):
+        res = EmoteSDK().search(page=page, limit=size)['data']
+        print(res)
+        return res
+    
+    def load_categories(self):
+        return EmoteSDK().get_categories()['data']
+    
+    def load_authors(self):
+        return EmoteSDK().get_authors()['data']
+
+    def load_tags(self):
+        return EmoteSDK().get_tags()['data']
+    
+    def max_page(self):
+        info = EmoteSDK().info()
+        return info['info']['emotes_count'] // self.page_size + (1 if info['info']['emotes_count'] % self.page_size else 0)
+
+    def make_search(self):
+        self.clear_emotes()
+
+        authors = []
+        categories = []
+        tags = []
+
+        query = dpg.get_value(f"{self.window_name}_search")
+
+        for checkbox in self.checkboxes['Authors']:
+            if dpg.get_value(checkbox):
+                label = dpg.get_item_label(checkbox)
+                authors.append(label)
+        
+        for checkbox in self.checkboxes['Categories']:
+            if dpg.get_value(checkbox):
+                label = dpg.get_item_label(checkbox)
+                categories.append(label)
+
+        for checkbox in self.checkboxes['Tags']:
+            if dpg.get_value(checkbox):
+                label = dpg.get_item_label(checkbox)
+                tags.append(label)
+
+        
+        result = EmoteSDK().search(
+            query = query, 
+            authors = authors, 
+            categories = categories, 
+            tags = tags, 
+            page = self.current_page, 
+            limit = self.page_size
+        )['data']
+
+        self.show_emotes(result)
+
+class OnlinePackEmotes(EmotesWindow):
+    
+    def load_emotes(self):
+        return 
+
+class LocalEmotes(EmotesWindow):
+
+    def load_emotes(self, page: int, size: int):
+        return load_local_emotes()[page*size:(page+1)*size]
+    
+    def load_categories(self):
+        return []
+    
+    def load_authors(self):
+        return []
+
+    def load_tags(self):
+        return []
+    
+    def max_page(self):
+        return len(self.load_emotes())
+
     def make_search(self):
         #local_emotes.update_emotes()
 
@@ -358,29 +469,9 @@ class EmotesWindow:
 
         self.show_emotes(emotes)
 
-
-
-class LocalEmotes(EmotesWindow):
-
-    def load_emotes(self, page: int, size: int):
-        return EmoteSDK().search(page=page, limit=size)
-    
-    def load_categories(self):
-        return EmoteSDK().get_categories()
-    
-    def load_authors(self):
-        return EmoteSDK().get_authors()
-
-    def load_tags(self):
-        return EmoteSDK().get_tags()
-    
-    def max_page(self):
-        info = EmoteSDK().info()
-        return info['info']['emotes_count'] // self.page_size + (1 if info['info']['emotes_count'] % self.page_size else 0)
-
 class FavoriteEmotes(EmotesWindow):
 
-    def load_emotes(self, page: int, size: int):
+    def load_emotes(self, page: int = 1, size: int = 30):
         return load_local_emotes()
     
     def load_categories(self):
@@ -394,21 +485,4 @@ class FavoriteEmotes(EmotesWindow):
     
     def max_page(self):
         return len(self.load_emotes())
-
-class OnlineEmotes(EmotesWindow):
     
-    def load_emotes(self):
-        return 
-
-class OnlinePackEmotes(EmotesWindow):
-    
-    def load_emotes(self):
-        return 
-
-"""
-
-
-
-
-
-"""

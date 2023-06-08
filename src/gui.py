@@ -13,12 +13,14 @@ SIZE = (800, 834)
 dpg.create_context()
 dpg.create_viewport(title='EmoteCraft - Emotes Library', width=SIZE[0], height=SIZE[1], min_width=SIZE[0], min_height=SIZE[1])
 dpg.setup_dearpygui()
+#dpg.show_debug()
 
 # add a font registry
 with dpg.font_registry():
 
     with dpg.font("./src/fonts/notomono-regular.ttf", 13, default_font=True, tag="Default font") as f:
         dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)
+        dpg.add_char_remap([0x00E0, 0x00E4],[0x0430,0x0434])
     
 dpg.bind_font("Default font")
 
@@ -168,7 +170,7 @@ def main_window():
                 with dpg.tab(label="My emotes", tag="my_emotes"):
 
                     my_emotes = LocalEmotes('my_emotes')
-                    my_emotes.load_page()                                 
+                    #my_emotes.load_page()                                 
 
 
                 with dpg.tab(label="Favorites", tag="favorites_tab"):
