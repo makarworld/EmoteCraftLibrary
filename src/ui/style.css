@@ -374,11 +374,10 @@ input[type="radio"] {
 
 .emotes span {
   user-select: all;
-  display: block;
+  display: inline;
   position: relative;
   color: #ffffff;
-  top: 8px;
-  left: 8px;
+
 }
 
 .emotes-grid {
@@ -517,7 +516,6 @@ input[type="radio"] {
 }
 
 .emote-title {
-    display: block;
     position: relative;
     font-family: 'Rubik', sans-serif;
     font-weight: 600;
@@ -525,7 +523,6 @@ input[type="radio"] {
 }
 
 .emote-author {
-    display: block;
     position: relative;
     font-family: 'Source Code Pro', monospace;
     font-weight: 400;

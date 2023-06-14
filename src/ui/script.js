@@ -1,5 +1,73 @@
 EMOTE_SERVER = "http://127.0.0.1:5000";
 
+function colour (text) {
+    left = htmlEncode("<");  
+    right = htmlEncode(">");
+    text = text.replace(/</gi, left);  
+    text = text.replace(/>/gi, right);
+    text = text.replace(/\n/gi, "§r<br />");
+    //colours
+    text = text.replace(/§0/gi,'</span>§r<span class="c-1">');
+    text = text.replace(/§1/gi,'</span>§r<span class="c-2">');
+    text = text.replace(/§2/gi,'</span>§r<span class="c-3">');
+    text = text.replace(/§3/gi,'</span>§r<span class="c-4">');
+    text = text.replace(/§4/gi,'</span>§r<span class="c-5">');
+    text = text.replace(/§5/gi,'</span>§r<span class="c-6">');
+    text = text.replace(/§6/gi,'</span>§r<span class="c-7">');
+    text = text.replace(/§7/gi,'</span>§r<span class="c-8">');
+    text = text.replace(/§8/gi,'</span>§r<span class="c-9">');
+    text = text.replace(/§9/gi,'</span>§r<span class="c-10">');
+    text = text.replace(/§a/gi,'</span>§r<span class="c-11">');
+    text = text.replace(/§b/gi,'</span>§r<span class="c-12">');
+    text = text.replace(/§c/gi,'</span>§r<span class="c-13">');
+    text = text.replace(/§d/gi,'</span>§r<span class="c-14">');
+    text = text.replace(/§e/gi,'</span>§r<span class="c-15">');
+    text = text.replace(/§f/gi,'</span>§r<span class="c-16">');
+    //bold
+    text = text.replace(/§l/gi,"<span style='font-weight:900;'>");
+    //italic
+    text = text.replace(/§o/gi,"<span style='font-style:italic;'>");
+    //strikethrough
+    text = text.replace(/§m/gi,"<span style='text-decoration:line-through'>");
+    //underlined
+    text = text.replace(/§n/gi,"<span style='text-decoration:underline'>");
+    //obfuscated
+    text = text.replace(/§k/gi,"<span class='obfuscated'>");
+    //reset
+    text = text.replace(/§r/gi, "</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>");
+    return text
+}
+
+function htmlEncode(value){
+    return $('<div/>').text(value).html();
+  }
+
+function randomizer(rawr) {
+    var length = rawr.length;
+    var text = '';
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < length; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+
+$.fn.selectRange = function(start, end){
+    if(!end) end = start;
+    return this.each(function(){
+        if (this.setSelectionRange) {
+            this.focus();
+            this.setSelectionRange(start, end);
+        } else if (this.createTextRange) {
+            var range = this.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', end);
+            range.moveStart('character', start);
+            range.select();
+        }
+    });
+};
 
 // functions for fill sidebar
 // fill categories
@@ -74,51 +142,30 @@ async function loadSidebar(endpoint) {
 
 function showGIF() {
     console.log("show gif");
-    console.log($(this));
-    image = $(this).children().children('div[class="emote-img"]').children('img');
-    image.attr('style', 'display: none;');
+    png = $(this).children().children('div[class="emote-img"]').children('img');
+    gif = png.next();
     wait = $(this).children().children('div[class="emote-img"]').prev();
-    wait.attr('style', 'display: flex;');
-    // get src
-    img_name = image.attr('src');
-    // get regex ([\S]+)\/(.+).(?:gif|png|jpg)
-    regex = /[\S]+\/(.+).(?:gif|png|jpg)/;
-    match = regex.exec(img_name);
 
-    // get 1 group 
-    _name = match[1];
+    //wait.attr('style', '');
 
-    console.log(_name);
+    // hide png and show gif
+    console.log(png.attr('style', 'display: none;'));
+    console.log(gif.attr('style', ''));
+    //wait.attr('style', '');
 
-    //image.attr('src', 'images/' + _name + '.gif');
 }
 
 function hideGIF() {
     console.log("hide gif");
-    image = $(this).children().children('div[class="emote-img"]').children('img');
+    png = $(this).children().children('div[class="emote-img"]').children('img');
+    gif = png.next();
     wait = $(this).children().children('div[class="emote-img"]').prev();
-    console.log(image);
-    //img_src = image.attr('src');
+    // hide gif and show png
+    wait.attr('style', 'display: none;');
+    console.log(png.attr('style', ''));
+    console.log(gif.attr('style', 'display: none;'));
 
 
-
-    //image.attr('style', '');
-    //wait.attr('style', 'display: none;');
-    //console.log(image);
-    // get src
-    //img_name = image.attr('src');
-    //console.log(img_name);
-    // get regex ([\S]+)\/(.+).(?:gif|png|jpg)
-    //regex = /[\S]+\/(.+).(?:gif|png|jpg)/;
-    //match = regex.exec(img_src);
-
-    // get 1 group 
-    //_name = match[1];
-    //console.log(_name);
-
-    //console.log(_name);
-
-    //image.attr('src', 'images/' + _name + '.png');
 }
 
 
@@ -143,7 +190,7 @@ function search(query, categories, tags, authors, page, limit) {
                 method: 'GET',
                 dataType: 'json'
             }).then(function(edata) {
-                console.log(edata);
+                //console.log(edata);
                 addEmote(
                     edata.data.json.name, 
                     edata.data.json.author, 
@@ -203,16 +250,18 @@ function addEmote(title, author, png, gif, id) {
     emote_title = document.createElement('div');
     emote_title.className = 'emote-title';
 
-    title_span = document.createElement('span');
-    title_span.innerText= title;
+    console.log(title, colour(title))
 
-    console.log(title_span);
+    title_span = document.createElement('span');
+    title_span.innerHTML = colour(title);
+
+    //console.log(title_span);
 
     emote_author = document.createElement('div');
     emote_author.className = 'emote-author';
 
     author_span = document.createElement('span');
-    author_span.innerHTML = author;
+    author_span.innerHTML = colour(author);
 
     emote_download = document.createElement('div');
     emote_download.className = 'emote-download';
@@ -239,14 +288,17 @@ function addEmote(title, author, png, gif, id) {
     emote_footer_content.appendChild(emote_download);
     emote_download.appendChild(emote_download_img);
 
+    console.log(emote);
     emote = $(emote);
-
     emote.appendTo('div[class="emotes-grid"]')
 
     //$('div[class="emotes-grid"]').append(emote);
-    console.log(emote);
+    //console.log(emote);
 
-    $(".emote").hover(showGIF, hideGIF)
+    //console.log('unbind');
+    //$(".emote").unbind('mouseenter mouseleave');
+    //console.log('bind');
+    //$(".emote").hover(showGIF, hideGIF)
 
     return emote;
 }
@@ -271,13 +323,16 @@ $(document).ready(() => {
 })
 
 // run after document load
-$(window).load(function(){
+$(window).on('load', function(){
     // func for sidebar radio buttons
     $(".line-radio").click(clickRadio)
 
     // func for title in sidebar, for transform image
     $(".title-flipper").click(clickTitle)
 
-    // hover on image
-    $(".emote").hover(showGIF, hideGIF)
+    $('.emotes-grid').on('mouseenter', '.emote', showGIF);
+
+    $('.emotes-grid').on('mouseleave', '.emote', hideGIF);
+
 });
+

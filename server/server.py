@@ -284,7 +284,7 @@ def get_emote(uuid: str):
         else:
             data[ex] = ''
     
-    with open(f"./server/emotes/{emote.tag}.json", "r") as f:
+    with open(f"./server/emotes/{emote.tag}.json", "r", encoding="utf-8") as f:
         data['json'] = json.load(f)
 
     data['uuid'] = uuid
