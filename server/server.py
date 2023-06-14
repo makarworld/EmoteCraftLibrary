@@ -267,6 +267,35 @@ def authors():
         'msg': ''
     })
 
+@app.route('/emote/<uuid>', methods = ['GET'])
+@check_auth
+def get_emote(uuid: str):
+    emote = db.base.emotes.get_one(uuid=uuid)
+    if not emote:
+        return abort('Not found', 404)
+    
+
+    data = {}
+    for ex in ("png", "gif"):
+        file = f"./server/emotes/{emote.tag}.{ex}"
+        if os.path.exists(file):
+            with open(file, "rb") as f:
+                data[ex] = base64.b64encode(f.read()).decode('utf-8')
+        else:
+            data[ex] = ''
+    
+    with open(f"./server/emotes/{emote.tag}.json", "r") as f:
+        data['json'] = json.load(f)
+
+    data['uuid'] = uuid
+
+    # return file
+    return return_json({
+        'success': True,
+        'data': data,
+        'msg': ''
+    })
+
 @app.route('/emote/<uuid>/png', methods = ['GET'])
 @check_auth
 def download_png(uuid: str):

@@ -373,9 +373,10 @@ input[type="radio"] {
 }
 
 .emotes span {
+  user-select: all;
   display: block;
   position: relative;
-  color: #565656;
+  color: #ffffff;
   top: 8px;
   left: 8px;
 }
@@ -400,28 +401,28 @@ input[type="radio"] {
 .emote {
   position: flex;
   display: inline-block;
-  background-color: #D9D9D9;
+
   width: 200px;
   height: 263px;
   padding-right: 8px;
   margin: 5px;
-  border-radius: 10px;
 
 }
 
 .emote-header {
     position: relative;
     display: inline-block;
-    background-color: #D9D9D9;
+    background-color: #3C3C43;
     width: 200px;
     height: 200px;
-    border-radius: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 .emote-footer {
     position: relative;
     display: inline-block;
-    background-color: #FFFFFF;
+    background-color: #4B506D;
     width: 200px;
     height: 63px;
     border-bottom-left-radius: 10px;
@@ -483,17 +484,16 @@ input[type="radio"] {
 
 .emote-img img {
     display: block;
-    width: 200px;
-    height: 200px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    width: 150px;
+    height: 150px;
     top: 0;
 }
 
 .emote-img {
     display: block;
     position: absolute;
-    top: 0;
+    top: 25px;
+    left: 25px;
 }
 
 .emote-like {
