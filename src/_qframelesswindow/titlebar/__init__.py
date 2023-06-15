@@ -2,7 +2,7 @@
 import sys
 
 from PyQt5.QtCore import QEvent, Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import QHBoxLayout, QLabel, QWidget
 
 from ..utils import startSystemMove
@@ -18,6 +18,15 @@ class TitleBar(QWidget):
         self.minBtn = MinimizeButton(parent=self)
         self.closeBtn = CloseButton(parent=self)
         self.maxBtn = MaximizeButton(parent=self)
+
+        self.minBtn.setHoverColor(QColor(0, 0, 0))
+        self.closeBtn.setHoverColor(QColor(0, 0, 0))
+        self.maxBtn.setHoverColor(QColor(0, 0, 0))
+
+        self.minBtn.setHoverBackgroundColor(QColor(0, 0, 0, 26))
+        self.closeBtn.setHoverBackgroundColor(QColor(0, 0, 0, 26))
+        self.maxBtn.setHoverBackgroundColor(QColor(0, 0, 0, 26))
+
         self.hBoxLayout = QHBoxLayout(self)
         self._isDoubleClickEnabled = True
 
@@ -26,7 +35,7 @@ class TitleBar(QWidget):
 
         # add buttons to layout
         self.hBoxLayout.setSpacing(0)
-        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.hBoxLayout.setContentsMargins(0, 1, 1, 0)
         self.hBoxLayout.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         self.hBoxLayout.addStretch(1)
         self.hBoxLayout.addWidget(self.minBtn, 0, Qt.AlignRight)

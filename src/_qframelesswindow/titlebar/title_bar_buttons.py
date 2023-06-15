@@ -217,14 +217,14 @@ class SvgTitleBarButton(TitleBarButton):
         painter.drawRect(self.rect())
 
         # draw icon
-        color = color.name()
-        pathNodes = self._svgDom.elementsByTagName('path')
-        for i in range(pathNodes.length()):
-            element = pathNodes.at(i).toElement()
-            element.setAttribute('stroke', color)
+        #color = color.name()
+        #pathNodes = self._svgDom.elementsByTagName('path')
+        #for i in range(pathNodes.length()):
+        #    element = pathNodes.at(i).toElement()
+        #    element.setAttribute('stroke', color)
 
-        renderer = QSvgRenderer(self._svgDom.toByteArray())
-        renderer.render(painter, QRectF(self.rect()))
+        #renderer = QSvgRenderer(self._svgDom.toByteArray())
+        #renderer.render(painter, QRectF(self.rect()))
 
 
 class MinimizeButton(TitleBarButton):
@@ -240,11 +240,11 @@ class MinimizeButton(TitleBarButton):
         painter.drawRect(self.rect())
 
         # draw icon
-        painter.setBrush(Qt.NoBrush)
-        pen = QPen(color, 1)
-        pen.setCosmetic(True)
-        painter.setPen(pen)
-        painter.drawLine(18, 16, 28, 16)
+        #painter.setBrush(Qt.NoBrush)
+        #pen = QPen(color, 1)
+        #pen.setCosmetic(True)
+        #painter.setPen(pen)
+        #painter.drawLine(18, 16, 28, 16)
 
 
 class MaximizeButton(TitleBarButton):
@@ -272,26 +272,26 @@ class MaximizeButton(TitleBarButton):
         painter.drawRect(self.rect())
 
         # draw icon
-        painter.setBrush(Qt.NoBrush)
-        pen = QPen(color, 1)
-        pen.setCosmetic(True)
-        painter.setPen(pen)
+        #painter.setBrush(Qt.NoBrush)
+        #pen = QPen(color, 1)
+        #pen.setCosmetic(True)
+        #painter.setPen(pen)
 
-        r = self.devicePixelRatioF()
-        painter.scale(1/r, 1/r)
-        if not self._isMax:
-            painter.drawRect(int(18*r), int(11*r), int(10*r), int(10*r))
-        else:
-            painter.drawRect(int(18*r), int(13*r), int(8*r), int(8*r))
-            x0 = int(18*r)+int(2*r)
-            y0 = 13*r
-            dw = int(2*r)
-            path = QPainterPath(QPointF(x0, y0))
-            path.lineTo(x0, y0-dw)
-            path.lineTo(x0+8*r, y0-dw)
-            path.lineTo(x0+8*r, y0-dw+8*r)
-            path.lineTo(x0+8*r-dw, y0-dw+8*r)
-            painter.drawPath(path)
+        #r = self.devicePixelRatioF()
+        #painter.scale(1/r, 1/r)
+        #if not self._isMax:
+        #    painter.drawRect(int(18*r), int(11*r), int(10*r), int(10*r))
+        #else:
+        #    painter.drawRect(int(18*r), int(13*r), int(8*r), int(8*r))
+        #    x0 = int(18*r)+int(2*r)
+        #    y0 = 13*r
+        #    dw = int(2*r)
+        #    path = QPainterPath(QPointF(x0, y0))
+        #    path.lineTo(x0, y0-dw)
+        #    path.lineTo(x0+8*r, y0-dw)
+        #    path.lineTo(x0+8*r, y0-dw+8*r)
+        #    path.lineTo(x0+8*r-dw, y0-dw+8*r)
+        #    painter.drawPath(path)
 
 
 class CloseButton(SvgTitleBarButton):
@@ -305,7 +305,9 @@ class CloseButton(SvgTitleBarButton):
         self.setPressedBackgroundColor(QColor(241, 112, 122))
 
 # remove paint event
-MinimizeButton.paintEvent = lambda self, e: None
-CloseButton.paintEvent = lambda self, e: None
-MaximizeButton.paintEvent = lambda self, e: None
-
+#MinimizeButton.paintEvent = lambda self, e: None
+#CloseButton.paintEvent = lambda self, e: None
+#MaximizeButton.paintEvent = lambda self, e: None
+#MinimizeButton.setHoverBackgroundColor(QColor(232, 17, 35))
+#CloseButton.setHoverBackgroundColor(QColor(232, 17, 35))
+#MaximizeButton.setHoverBackgroundColor(QColor(232, 17, 35))
