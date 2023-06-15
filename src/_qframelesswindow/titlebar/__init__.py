@@ -69,10 +69,10 @@ class TitleBar(QWidget):
 
     def __toggleMaxState(self):
         """ Toggles the maximization state of the window and change icon """
-        if self.window().isFullScreen():
+        if self.window().isMaximized():
             self.window().showNormal()
         else:
-            self.window().showFullScreen()
+            self.window().showMaximized()
 
     def _isDragRegion(self, pos):
         """ Check whether the position belongs to the area where dragging is allowed """
