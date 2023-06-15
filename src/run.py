@@ -80,7 +80,7 @@ from loguru import logger
 from pyfladesk import init_gui
 
 
-app = Flask(__name__, template_folder='./ui', static_folder='./ui')
+app = Flask(__name__)
 CORS(app)
 
 from local_server import *
