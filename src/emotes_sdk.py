@@ -138,8 +138,8 @@ class EmoteSDK(BaseSDK, Singleton):
 if __name__ == "__main__":
     emotes_sdk = EmoteSDK(api_key = os.environ.get('EMOTES_API_KEY'))
     #r = emotes_sdk._test()
-    #path = os.path.expanduser('~') + '\\AppData\\Roaming\\.minecraft\\emotes\\'
-    #name = "kiss"
+    path = os.path.expanduser('~') + '\\AppData\\Roaming\\.minecraft\\emotes\\'
+    name = "SPE_Jump sideways over a block2"
 
     #from PIL import Image, ImageDraw, ImageFont #dynamic import
 
@@ -147,13 +147,13 @@ if __name__ == "__main__":
     #img = Image.open(gif)
     #img.save(name + ".png",'png', optimize=True, quality=70)
 
-    #r = emotes_sdk.upload(
-    #    f"{path}{name}.json", 
-    #    f"{path}{name}.png", 
-    #    f"{path}{name}.gif", 
-    #    categories=["LOVE"], 
-    #    tags=["KISS"])
-    #print(r)
+    r = emotes_sdk.upload(
+        f"{path}{name}.json", 
+        f"{path}{name}.png", 
+        f"{path}{name}.gif", 
+        categories=["WALK"], 
+        tags=["RUN", "JUMP"])
+    print(r)
     #r = emotes_sdk.search(
     #    query="v5",
     #    authors=['BoBkiNN_']

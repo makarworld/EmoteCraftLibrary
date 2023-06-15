@@ -148,7 +148,8 @@ def search():
     tags       = request.args.get('t')
     authors    = request.args.get('a')
     page       = request.args.get('p', 1)
-    limit       = request.args.get('l', 9)
+    limit      = request.args.get('l', 9)
+    print(limit)
 
     if int(page) <= 0: 
         return abort('Invalid page', 401)

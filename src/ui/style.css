@@ -204,6 +204,7 @@ body {
 .dropdown-btn span {
     position: relative;
     bottom: 4px;
+    left: 2px;
 }
 
 .dropdown-btn img {
@@ -327,8 +328,8 @@ input[type="radio"] {
     font-family: 'Rubik', sans-serif;
     font-weight: 500;
     width: calc(100% - 10px);
-    left: 6px;
-    top: 3px;
+    left: 9px;
+    top: 4px;
 }
 
 .search-btn {
@@ -350,7 +351,6 @@ input[type="radio"] {
     display: block;
     position: relative;
     margin: auto;
-    top: 5px;
 }
 
 .vertical-content {
@@ -376,8 +376,14 @@ input[type="radio"] {
   user-select: all;
   display: inline;
   position: relative;
-  color: #ffffff;
+}
 
+.results {
+    display: block;
+    position: relative;
+    color: #565656;
+    left: 8px;
+    top: 8px;
 }
 
 .emotes-grid {

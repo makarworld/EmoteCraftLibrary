@@ -74,14 +74,14 @@ $.fn.selectRange = function(start, end){
 function fillSidebarContent(name, cats) {
     for (i = 0; i < cats.length; i++) {
         if (name != "authors") {
-            cname = cats[i].toLowerCase();
+            var cname = cats[i].toLowerCase();
         } else {
-            cname = cats[i];
+            var cname = cats[i];
         }
 
         $('div[name="' + name + '"]').append(
             "<div class='wrap-content line-radio'>" +
-            "<input type='radio' id='line' style='display:none'>" +
+            "<input type='radio' id='line' class='radio-select' name='" + name + "' value='" + cname + "' style='display:none'>" +
             "<img src='images/radio_off.svg' alt='unchecked'>" +
             "<label for='line' class='line-label' style='padding-left: 4px;'>" +
             cname + 
@@ -103,13 +103,13 @@ function clickRadio() {
     console.log('end');
 
     if (!state) {
-        checkbox.attr('checked', true);
+        //$(this).attr('id', 1);
         image.attr('src', 'images/radio_on.svg');
-        image.attr('alt', 'checked');
+        checkbox.attr('checked', true);
     } else {
-        checkbox.attr('checked', false);
+        //$(this).attr('id', 0);
         image.attr('src', 'images/radio_off.svg');
-        image.attr('alt', 'unchecked');
+        checkbox.attr('checked', false);
     }
 }
 
@@ -141,7 +141,6 @@ async function loadSidebar(endpoint) {
 }
 
 function showGIF() {
-    console.log("show gif");
     png = $(this).children().children('div[class="emote-img"]').children('img');
     gif = png.next();
     wait = $(this).children().children('div[class="emote-img"]').prev();
@@ -149,21 +148,20 @@ function showGIF() {
     //wait.attr('style', '');
 
     // hide png and show gif
-    console.log(png.attr('style', 'display: none;'));
-    console.log(gif.attr('style', ''));
+    png.attr('style', 'display: none;');
+    gif.attr('style', '');
     //wait.attr('style', '');
 
 }
 
 function hideGIF() {
-    console.log("hide gif");
     png = $(this).children().children('div[class="emote-img"]').children('img');
     gif = png.next();
     wait = $(this).children().children('div[class="emote-img"]').prev();
     // hide gif and show png
     wait.attr('style', 'display: none;');
-    console.log(png.attr('style', ''));
-    console.log(gif.attr('style', 'display: none;'));
+    png.attr('style', '');
+    gif.attr('style', 'display: none;');
 
 
 }
@@ -175,15 +173,15 @@ function search(query, categories, tags, authors, page, limit) {
         method: 'GET',
         dataType: 'json',
         data: {
-            query: query,
-            categories: categories,
-            tags: tags,
-            authors: authors,
-            page: page,
-            limit: limit
+            q: query,
+            c: categories,
+            t: tags,
+            a: authors,
+            p: page,
+            l: limit
         }
     }).then(function(data) {
-        console.log(data);
+        //console.log(data);
         for (i = 0; i < data.data.length; i++) {
             $.ajax({
                 url: EMOTE_SERVER + '/emote/' + data.data[i].uuid,
@@ -204,11 +202,19 @@ function search(query, categories, tags, authors, page, limit) {
 }
 
 
+function likeEmote() {
+    img = $(this).children().attr('src');
+    if (img == "images/heart_outline.svg")
+        $(this).children().attr('src', 'images/heart_fill.svg');
+    else
+        $(this).children().attr('src', 'images/heart_outline.svg');
+}
+
 
 function addEmote(title, author, png, gif, id) {
     emote = document.createElement('div');
     emote.className = 'emote';
-    // set id 
+ 
     emote.id = id;
 
     emote_header = document.createElement('div');
@@ -250,12 +256,10 @@ function addEmote(title, author, png, gif, id) {
     emote_title = document.createElement('div');
     emote_title.className = 'emote-title';
 
-    console.log(title, colour(title))
+    //console.log(title, colour(title))
 
     title_span = document.createElement('span');
     title_span.innerHTML = colour(title);
-
-    //console.log(title_span);
 
     emote_author = document.createElement('div');
     emote_author.className = 'emote-author';
@@ -288,17 +292,8 @@ function addEmote(title, author, png, gif, id) {
     emote_footer_content.appendChild(emote_download);
     emote_download.appendChild(emote_download_img);
 
-    console.log(emote);
     emote = $(emote);
     emote.appendTo('div[class="emotes-grid"]')
-
-    //$('div[class="emotes-grid"]').append(emote);
-    //console.log(emote);
-
-    //console.log('unbind');
-    //$(".emote").unbind('mouseenter mouseleave');
-    //console.log('bind');
-    //$(".emote").hover(showGIF, hideGIF)
 
     return emote;
 }
@@ -319,20 +314,58 @@ $(document).ready(() => {
         fillSidebarContent("authors", resp.data);
     })
 
-    search();
+    search('', '', '', '', 1, 90);
 })
 
 // run after document load
 $(window).on('load', function(){
     // func for sidebar radio buttons
-    $(".line-radio").click(clickRadio)
+    //$(".line-radio").click(clickRadio)
+    $(".filters-content").on('click', '.line-radio', clickRadio)
 
     // func for title in sidebar, for transform image
-    $(".title-flipper").click(clickTitle)
+    //$(".title-flipper").click(clickTitle)
+    $(".filters-content").on('click', '.title-flipper', clickTitle)
+
+    // func for hover on search button
+    $(".search-btn").hover(
+        () => { $(".search-btn").css('background', '#1971ff'); }, 
+        () => { $(".search-btn").css('background', '#3B82F6'); }
+        )
+    // func for make search
+    $(".search-btn").click(function(){
+        query = $(".search-input").val();
+        
+        tags  = [];
+        categories = [];
+        authors = [];
+
+        //$("input[id='line']").each(function(){
+        //    if($(this).is(':checked')) {
+        //        console.log($(this).attr('value'));
+        //        //if($(this).attr('name') == 'categories'){
+        //        //    categories.push($(this).attr('value'));
+        //        //}
+        //        //if($(this).attr('name') == 'tags'){
+        //        //    tags.push($(this).attr('value'));
+        //        //}
+        //        //if($(this).attr('name') == 'authors'){
+        //        //    authors.push($(this).attr('value'));
+        //        //    console.log(authors);
+        //        //}
+        //    }
+        //})
+        $('div[name="tags"]').find('input[class="radio-select"]:checked').each(function() {
+            // Do something with each checked input
+            console.log($(this).val());
+        });
+
+
+    })
 
     $('.emotes-grid').on('mouseenter', '.emote', showGIF);
-
     $('.emotes-grid').on('mouseleave', '.emote', hideGIF);
+    $('.emotes-grid').on('click', '.emote-like', likeEmote);
 
 });
 

@@ -73,45 +73,17 @@ SOON
 
 
 """
-import json
-from flask import Flask, request, render_template
-from flask import send_file
+from flask import Flask
 from flask_cors import CORS
 from loguru import logger
-import base64
-import os
 
-from run import app
+from pyfladesk import init_gui
 
-def return_json(data):
-    return json.dumps(data, ensure_ascii=False, indent=4)
 
-def abort(msg: str, status_code: int):
-    return return_json({
-        'success': False,
-        'data': [],
-        'msg': msg
-    }), status_code
+app = Flask(__name__, template_folder='./ui', static_folder='./ui')
+CORS(app)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/test')
-def test():
-    print('req', request.__dict__)
-    print('files', request.files)
-    print('json', request.get_json(silent=True))
-    print('args', request.args)
-    print('form', request.form)
-
-    return return_json({
-        'reg': str(request.__dict__),
-        'files': str(request.files),
-        'json': str(request.get_json(silent=True)),
-        'args': str(request.args),
-        'form': str(request.form)
-    })
+from local_server import *
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    init_gui(app, 5001, 1280, 688)
