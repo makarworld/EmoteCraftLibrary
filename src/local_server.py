@@ -104,6 +104,7 @@ def test():
     print('json', request.get_json(silent=True))
     print('args', request.args)
     print('form', request.form)
+    app.sendPyQtSignal(1)
 
     return return_json({
         'reg': str(request.__dict__),
@@ -112,6 +113,25 @@ def test():
         'args': str(request.args),
         'form': str(request.form)
     })
+
+@app.route('/minimize')
+@app.route('/maximize')
+@app.route('/close')
+def window_titlebar():
+    print(request.url)
+    if request.url.endswith('/minimize'):
+        app.sendPyQtSignal(101)
+
+    elif request.url.endswith('/maximize'):
+        app.sendPyQtSignal(102)
+
+    elif request.url.endswith('/close'):
+        app.sendPyQtSignal(103)
+
+    return return_json({
+        'success': True
+    })
+
 
 if __name__ == '__main__':
     app.run(port=5001)

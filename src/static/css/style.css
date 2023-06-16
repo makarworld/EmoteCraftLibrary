@@ -116,7 +116,7 @@ body {
     width: 141px;
     height: 35px;
     left: calc(50% - 141px/2 + 21.5px);
-
+    top: 3px;
 }
 
 .bar-right {

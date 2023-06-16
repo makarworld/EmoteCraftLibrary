@@ -1,4 +1,4 @@
-EMOTE_SERVER = "http://127.0.0.1:5000";
+EMOTE_SERVER = "http://127.0.0.1:5020";
 
 function colour (text) {
     left = htmlEncode("<");  
@@ -82,7 +82,7 @@ function fillSidebarContent(name, cats) {
         $('div[name="' + name + '"]').append(
             "<div class='wrap-content line-radio'>" +
             "<input type='radio' id='line' class='radio-select' name='" + name + "' value='" + cname + "' style='display:none'>" +
-            "<img src='images/radio_off.svg' alt='unchecked'>" +
+            "<img src='/static/images/radio_off.svg' alt='unchecked'>" +  
             "<label for='line' class='line-label' style='padding-left: 4px;'>" +
             cname + 
             "</label></div>"
@@ -104,11 +104,11 @@ function clickRadio() {
 
     if (!state) {
         //$(this).attr('id', 1);
-        image.attr('src', 'images/radio_on.svg');
+        image.attr('src', '/static/images/radio_on.svg');
         checkbox.attr('checked', true);
     } else {
         //$(this).attr('id', 0);
-        image.attr('src', 'images/radio_off.svg');
+        image.attr('src', '/static/images/radio_off.svg');
         checkbox.attr('checked', false);
     }
 }
@@ -204,10 +204,10 @@ function search(query, categories, tags, authors, page, limit) {
 
 function likeEmote() {
     img = $(this).children().attr('src');
-    if (img == "images/heart_outline.svg")
-        $(this).children().attr('src', 'images/heart_fill.svg');
+    if (img == "/static/images/like_empty.svg")
+        $(this).children().attr('src', '/static/images/like.svg');
     else
-        $(this).children().attr('src', 'images/heart_outline.svg');
+        $(this).children().attr('src', '/static/images/like_empty.svg');
 }
 
 
@@ -225,7 +225,7 @@ function addEmote(title, author, png, gif, id) {
     emote_wait.style.display = 'none';
 
     logo = document.createElement('img');
-    logo.src = 'images/logo.svg';
+    logo.src = '/static/images/logo.svg';
     logo.alt = 'wait';
 
     emote_img = document.createElement('div');
@@ -244,7 +244,7 @@ function addEmote(title, author, png, gif, id) {
     emote_like.className = 'emote-like';
 
     emote_like_img = document.createElement('img');
-    emote_like_img.src = 'images/heart_outline.svg';
+    emote_like_img.src = '/static/images/like_empty.svg';
     emote_like_img.alt = 'like';
 
     emote_footer = document.createElement('div');
@@ -271,7 +271,7 @@ function addEmote(title, author, png, gif, id) {
     emote_download.className = 'emote-download';
 
     emote_download_img = document.createElement('img');
-    emote_download_img.src = 'images/download.svg';
+    emote_download_img.src = '/static/images/download.svg';
 
     emote.appendChild(emote_header);
     emote.appendChild(emote_footer);

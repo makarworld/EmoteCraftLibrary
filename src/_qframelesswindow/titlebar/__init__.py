@@ -43,9 +43,9 @@ class TitleBar(QWidget):
         self.hBoxLayout.addWidget(self.closeBtn, 0, Qt.AlignRight)
 
         # connect signal to slot
-        self.minBtn.clicked.connect(self.window().showMinimized)
-        self.maxBtn.clicked.connect(self.__toggleMaxState)
-        self.closeBtn.clicked.connect(self.window().close)
+        #self.minBtn.clicked.connect(self.window().showMinimized)
+        #self.maxBtn.clicked.connect(self.__toggleMaxState)
+        #self.closeBtn.clicked.connect(self.window().close)
 
         self.window().installEventFilter(self)
 

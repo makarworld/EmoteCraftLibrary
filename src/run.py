@@ -86,4 +86,4 @@ CORS(app)
 from local_server import *
 
 if __name__ == '__main__':
-    init_gui(app, 5001, 1280, 688)
+    init_gui(app, 5010, 1280, 688)

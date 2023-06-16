@@ -12,9 +12,31 @@ class MainWindow(FramelessMainWindow):
         super().__init__()
         self.setTitleBar(StandardTitleBar(self))
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+    
+    def resolve_signal(self, value: int):
+        print('signal', value)
+        if value == 101:
+            # minimize
+            self.showMinimized()
+
+        elif value == 102:
+            # maximize
+            if self.isMaximized():
+                self.showNormal()
+            else:
+                self.showMaximized()
+
+        elif value == 103:
+            # close
+            self.close()
+
+
 
 class ApplicationThread(QtCore.QThread):
-    def __init__(self, application, port=5000):
+
+    any_signal = QtCore.pyqtSignal(int)
+
+    def __init__(self, application, port = 5000):
         super(ApplicationThread, self).__init__()
         self.application = application
         self.port = port
@@ -22,7 +44,11 @@ class ApplicationThread(QtCore.QThread):
     def __del__(self):
         self.wait()
 
+    def send_signal(self, value):
+        self.any_signal.emit(value)
+
     def run(self):
+        self.application.sendPyQtSignal = self.send_signal
         self.application.run(port=self.port, threaded=True)
 
 
@@ -56,16 +82,20 @@ def init_gui(application, port=0, width=800, height=600, argv=None):
 
     # Application Level
     qtapp = QtWidgets.QApplication(argv)
-    webapp = ApplicationThread(application, port)
-    webapp.start()
-    qtapp.aboutToQuit.connect(webapp.terminate)
 
     # Main Window Level
     window = MainWindow()
     window.resize(width, height)
 
+    # Connect webapp to application
+    webapp = ApplicationThread(application, port)
+    webapp.any_signal.connect(window.resolve_signal)
+    webapp.start()
+    qtapp.aboutToQuit.connect(webapp.terminate)
+
     # WebView Level
     webView = QtWebEngineWidgets.QWebEngineView(window)
+    webView.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
     window.setContentsMargins(0, 0, 0, 0)
     window.setCentralWidget(webView)
 
