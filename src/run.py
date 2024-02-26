@@ -75,15 +75,14 @@ SOON
 """
 from flask import Flask
 from flask_cors import CORS
-from loguru import logger
 
 from pyfladesk import init_gui
 
+from local_server import *
 
 app = Flask(__name__)
 CORS(app)
 
-from local_server import *
 
 if __name__ == '__main__':
     init_gui(app, 5010, 1280, 688)

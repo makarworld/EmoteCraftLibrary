@@ -1,0 +1,159 @@
+
+<html>
+    <head>
+        <title>EmoteCraft Library</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/reset.css') }}"> 
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/minecraft-colors.css') }}">
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;600;800&family=Rubik:wght@500;600;900&family=Source+Code+Pro&display=swap" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        
+    </head>
+    <body>
+
+
+        <section class="window">
+            <div class="container">
+                
+                <div class="titlebar">
+                    <div class="bar-left">
+                        <ul class="bar-left-items">
+                            <li class="settings">
+                                <a href="#" class="bar-link">
+                                    <img src="{{ url_for('static', filename='images/settings.svg') }}", alt="settings">
+                                </a>
+                            </li>
+                            <li class="light-mode">
+                                <a href="#" class="bar-link">
+                                    <img src="{{ url_for('static', filename='images/sun.svg') }}", alt="light">
+                                </a>
+                            </li>
+                            <li class="help">
+                                <a href="#" class="bar-link">
+                                    <img src="{{ url_for('static', filename='images/help_questionmark.svg') }}", alt="question">
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="upper_logo">
+                        <a href="#">
+                            <img src="{{ url_for('static', filename='images/upper_logo.svg') }}" alt="EmoteCraft Library">
+                        </a>
+                    </div>
+
+                    <div class="bar-right">
+                        <ul class="bar-right-items">
+                            <li class=" bar-item">
+                                <a href="#" class="bar-link">
+                                    <img src="{{ url_for('static', filename='images/minimize.svg') }}" class="minimize" alt="_">
+                                </a>
+                            </li>
+                            <li class="bar-item">
+                                <a href="#" class="bar-link">
+                                    <img src="{{ url_for('static', filename='images/maximize.svg') }}" class="maximize" alt="[ ]">
+                                </a>
+                            </li>
+                            <li class="bar-item">
+                                <a href="#" class="bar-link">
+                                    <img src="{{ url_for('static', filename='images/close.svg') }}" class="close" alt="X">
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="emotes-content">
+                    <div class="sidebar">
+                        <div class="filters Rubik-600">
+                            <span class="filters-title">Filters</span>
+
+                            <div class="filters-content">
+
+                                <div class="single-filter-title title-flipper">
+                                    <button class="dropdown-btn">
+                                        <img src="{{ url_for('static', filename='images/arrow_off.svg') }}" alt="unchecked" class="title-flipper">
+                                        <span>Categories</span>
+                                    </button>
+                                </div>
+
+                                <div name="categories" class="single-filter-content" style="display: none;">
+                                    
+                                    <!-- IDK why first element clicked wrong -->
+                                    <!-- for fix this i add first element with display:none -->
+                                    <!-- other elements click works correctly -->
+                                    <div class="wrap-content line-radio" style="display:none">
+                                        <input type="radio" id="line" style="display:none">
+                                        <img src="{{ url_for('static', filename='images/radio_off.svg') }}" alt="unchecked">
+                                        <label for="line" class="line-label"></label>
+                                    </div>
+                                    <!-- ^^^ this element should stay here ^^^ -->
+
+                                    <!-- will be filled with script.js -->
+
+                                </div>
+
+
+                                <div class="single-filter-title title-flipper">
+                                    <button class="dropdown-btn">
+                                        <img src="{{ url_for('static', filename='images/arrow_off.svg') }}" alt="unchecked" class="title-flipper">
+                                        <span>Tags</span>
+                                    </button>
+                                </div>
+
+                                <div name="tags" class="single-filter-content" style="display: none;">
+                                    <!-- will be filled with script.js -->
+                                </div>
+
+
+                                <div class="single-filter-title title-flipper">
+                                    <button class="dropdown-btn">
+                                        <img src="{{ url_for('static', filename='images/arrow_off.svg') }}" alt="unchecked" class="title-flipper">
+                                        <span>Authors</span>
+                                    </button>
+                                </div>
+
+                                <div name="authors" class="single-filter-content" style="display: none;">
+                                    <!-- will be filled with script.js -->
+                                </div> 
+                            </div>
+                        </div>
+                    </div> 
+                    
+                    <div class="vertical-content">
+
+                        <div class="search-bar">
+                            <div class="search-bg">
+                                <div class="search-input">
+                                    <input type="text" class="query" placeholder="Милян крутой" maxlength="115">
+                                
+                                </div>
+                                <button class="search-btn">
+                                    <img src="{{ url_for('static', filename='images/search.svg') }}" alt="search" class="search-icon-btn">
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="emotes">
+                            <span class="results">Results:</span>
+                            <div class="emotes-grid">
+                                <!-- will be filled with script.js -->
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        <script>
+            require('./renderer.js')
+        </script>
+    </body>
+</html>

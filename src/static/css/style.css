@@ -60,14 +60,13 @@ body {
 }
 
 .titlebar {
+    -webkit-app-region: drag;
     user-select: none;
     display: block;
     position: relative;
     height: 35px;
     background: #272729;
     min-height: 35px;
-
-    
 }
 
 .bar-left {
