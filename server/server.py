@@ -105,7 +105,7 @@ def abort(msg: str, status_code: int):
         'msg': msg
     }), status_code
 
-def check_access(req: request, route: str):
+def check_access(req, route: str):
     if req.headers.get('User-Agent', '').startswith('EmoteCraftLibrary/gui-client/'):
         return True, "OK"
 
